@@ -1,6 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, ArrowRight, BookOpen, FileText, Users, Send } from "lucide-react";
+import { Search, ArrowRight, BookOpen, FileText, Users, Send, Download } from "lucide-react";
+import type { Article } from "@/lib/mock-articles";
+import { toast } from "sonner";
+
+function downloadArticle(a: Article) {
+  const content = `Ghana Journal of Forestry\nDOI: ${a.doi}\n\n${a.title}\n${a.authors.join(", ")}\nVol ${a.volume}, No ${a.issue} · pp ${a.pages} · ${new Date(a.publishedAt).toDateString()}\n\nAbstract\n${a.abstract}\n\nKeywords: ${a.keywords.join(", ")}\n`;
+  const blob = new Blob([content], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${a.id}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  toast.success("Download started", { description: a.title });
+}
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
