@@ -19,9 +19,13 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReviewerIndexRouteImport } from './routes/reviewer.index'
 import { Route as AuthorIndexRouteImport } from './routes/author.index'
+import { Route as ReviewerProfileRouteImport } from './routes/reviewer.profile'
+import { Route as ReviewerEthicsRouteImport } from './routes/reviewer.ethics'
 import { Route as AuthorSubmitRouteImport } from './routes/author.submit'
 import { Route as AuthorProfileRouteImport } from './routes/author.profile'
 import { Route as ReviewerInvitationsIndexRouteImport } from './routes/reviewer.invitations.index'
+import { Route as ReviewerInvitationsIdRouteImport } from './routes/reviewer.invitations.$id'
+import { Route as ReviewerAssignmentsIdRouteImport } from './routes/reviewer.assignments.$id'
 import { Route as AuthorManuscriptsIdRouteImport } from './routes/author.manuscripts.$id'
 import { Route as AuthorManuscriptsIdReviseRouteImport } from './routes/author.manuscripts.$id.revise'
 import { Route as AuthorManuscriptsIdEthicsRouteImport } from './routes/author.manuscripts.$id.ethics'
@@ -76,6 +80,16 @@ const AuthorIndexRoute = AuthorIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthorRoute,
 } as any)
+const ReviewerProfileRoute = ReviewerProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ReviewerRoute,
+} as any)
+const ReviewerEthicsRoute = ReviewerEthicsRouteImport.update({
+  id: '/ethics',
+  path: '/ethics',
+  getParentRoute: () => ReviewerRoute,
+} as any)
 const AuthorSubmitRoute = AuthorSubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
@@ -92,6 +106,16 @@ const ReviewerInvitationsIndexRoute =
     path: '/invitations/',
     getParentRoute: () => ReviewerRoute,
   } as any)
+const ReviewerInvitationsIdRoute = ReviewerInvitationsIdRouteImport.update({
+  id: '/invitations/$id',
+  path: '/invitations/$id',
+  getParentRoute: () => ReviewerRoute,
+} as any)
+const ReviewerAssignmentsIdRoute = ReviewerAssignmentsIdRouteImport.update({
+  id: '/assignments/$id',
+  path: '/assignments/$id',
+  getParentRoute: () => ReviewerRoute,
+} as any)
 const AuthorManuscriptsIdRoute = AuthorManuscriptsIdRouteImport.update({
   id: '/manuscripts/$id',
   path: '/manuscripts/$id',
@@ -121,9 +145,13 @@ export interface FileRoutesByFullPath {
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
+  '/reviewer/ethics': typeof ReviewerEthicsRoute
+  '/reviewer/profile': typeof ReviewerProfileRoute
   '/author/': typeof AuthorIndexRoute
   '/reviewer/': typeof ReviewerIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/reviewer/assignments/$id': typeof ReviewerAssignmentsIdRoute
+  '/reviewer/invitations/$id': typeof ReviewerInvitationsIdRoute
   '/reviewer/invitations/': typeof ReviewerInvitationsIndexRoute
   '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
   '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
@@ -137,9 +165,13 @@ export interface FileRoutesByTo {
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
+  '/reviewer/ethics': typeof ReviewerEthicsRoute
+  '/reviewer/profile': typeof ReviewerProfileRoute
   '/author': typeof AuthorIndexRoute
   '/reviewer': typeof ReviewerIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/reviewer/assignments/$id': typeof ReviewerAssignmentsIdRoute
+  '/reviewer/invitations/$id': typeof ReviewerInvitationsIdRoute
   '/reviewer/invitations': typeof ReviewerInvitationsIndexRoute
   '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
   '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
@@ -156,9 +188,13 @@ export interface FileRoutesById {
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
+  '/reviewer/ethics': typeof ReviewerEthicsRoute
+  '/reviewer/profile': typeof ReviewerProfileRoute
   '/author/': typeof AuthorIndexRoute
   '/reviewer/': typeof ReviewerIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/reviewer/assignments/$id': typeof ReviewerAssignmentsIdRoute
+  '/reviewer/invitations/$id': typeof ReviewerInvitationsIdRoute
   '/reviewer/invitations/': typeof ReviewerInvitationsIndexRoute
   '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
   '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
@@ -176,9 +212,13 @@ export interface FileRouteTypes {
     | '/submit'
     | '/author/profile'
     | '/author/submit'
+    | '/reviewer/ethics'
+    | '/reviewer/profile'
     | '/author/'
     | '/reviewer/'
     | '/author/manuscripts/$id'
+    | '/reviewer/assignments/$id'
+    | '/reviewer/invitations/$id'
     | '/reviewer/invitations/'
     | '/author/manuscripts/$id/ethics'
     | '/author/manuscripts/$id/revise'
@@ -192,9 +232,13 @@ export interface FileRouteTypes {
     | '/submit'
     | '/author/profile'
     | '/author/submit'
+    | '/reviewer/ethics'
+    | '/reviewer/profile'
     | '/author'
     | '/reviewer'
     | '/author/manuscripts/$id'
+    | '/reviewer/assignments/$id'
+    | '/reviewer/invitations/$id'
     | '/reviewer/invitations'
     | '/author/manuscripts/$id/ethics'
     | '/author/manuscripts/$id/revise'
@@ -210,9 +254,13 @@ export interface FileRouteTypes {
     | '/submit'
     | '/author/profile'
     | '/author/submit'
+    | '/reviewer/ethics'
+    | '/reviewer/profile'
     | '/author/'
     | '/reviewer/'
     | '/author/manuscripts/$id'
+    | '/reviewer/assignments/$id'
+    | '/reviewer/invitations/$id'
     | '/reviewer/invitations/'
     | '/author/manuscripts/$id/ethics'
     | '/author/manuscripts/$id/revise'
@@ -301,6 +349,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthorIndexRouteImport
       parentRoute: typeof AuthorRoute
     }
+    '/reviewer/profile': {
+      id: '/reviewer/profile'
+      path: '/profile'
+      fullPath: '/reviewer/profile'
+      preLoaderRoute: typeof ReviewerProfileRouteImport
+      parentRoute: typeof ReviewerRoute
+    }
+    '/reviewer/ethics': {
+      id: '/reviewer/ethics'
+      path: '/ethics'
+      fullPath: '/reviewer/ethics'
+      preLoaderRoute: typeof ReviewerEthicsRouteImport
+      parentRoute: typeof ReviewerRoute
+    }
     '/author/submit': {
       id: '/author/submit'
       path: '/submit'
@@ -320,6 +382,20 @@ declare module '@tanstack/react-router' {
       path: '/invitations'
       fullPath: '/reviewer/invitations/'
       preLoaderRoute: typeof ReviewerInvitationsIndexRouteImport
+      parentRoute: typeof ReviewerRoute
+    }
+    '/reviewer/invitations/$id': {
+      id: '/reviewer/invitations/$id'
+      path: '/invitations/$id'
+      fullPath: '/reviewer/invitations/$id'
+      preLoaderRoute: typeof ReviewerInvitationsIdRouteImport
+      parentRoute: typeof ReviewerRoute
+    }
+    '/reviewer/assignments/$id': {
+      id: '/reviewer/assignments/$id'
+      path: '/assignments/$id'
+      fullPath: '/reviewer/assignments/$id'
+      preLoaderRoute: typeof ReviewerAssignmentsIdRouteImport
       parentRoute: typeof ReviewerRoute
     }
     '/author/manuscripts/$id': {
@@ -377,12 +453,20 @@ const AuthorRouteWithChildren =
   AuthorRoute._addFileChildren(AuthorRouteChildren)
 
 interface ReviewerRouteChildren {
+  ReviewerEthicsRoute: typeof ReviewerEthicsRoute
+  ReviewerProfileRoute: typeof ReviewerProfileRoute
   ReviewerIndexRoute: typeof ReviewerIndexRoute
+  ReviewerAssignmentsIdRoute: typeof ReviewerAssignmentsIdRoute
+  ReviewerInvitationsIdRoute: typeof ReviewerInvitationsIdRoute
   ReviewerInvitationsIndexRoute: typeof ReviewerInvitationsIndexRoute
 }
 
 const ReviewerRouteChildren: ReviewerRouteChildren = {
+  ReviewerEthicsRoute: ReviewerEthicsRoute,
+  ReviewerProfileRoute: ReviewerProfileRoute,
   ReviewerIndexRoute: ReviewerIndexRoute,
+  ReviewerAssignmentsIdRoute: ReviewerAssignmentsIdRoute,
+  ReviewerInvitationsIdRoute: ReviewerInvitationsIdRoute,
   ReviewerInvitationsIndexRoute: ReviewerInvitationsIndexRoute,
 }
 
