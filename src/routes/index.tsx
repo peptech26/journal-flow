@@ -1,214 +1,170 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, BookOpen, FileText, Users2, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, BookOpen, FileText, Users, Send } from "lucide-react";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { articles } from "@/lib/mock-articles";
+import heroImg from "@/assets/forest-hero.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ghana Journal of Forestry — Peer-reviewed forestry research" },
-      {
-        name: "description",
-        content:
-          "Open-access, peer-reviewed research on forests, biodiversity, and sustainable land use in Ghana and West Africa.",
-      },
+      { title: "Ghana Journal of Forestry — Peer-reviewed research from West Africa" },
+      { name: "description", content: "Browse peer-reviewed research on tropical forestry, ecology, conservation and silviculture across Ghana and West Africa." },
       { property: "og:title", content: "Ghana Journal of Forestry" },
-      {
-        property: "og:description",
-        content: "Open-access, peer-reviewed forestry research from Ghana and West Africa.",
-      },
+      { property: "og:description", content: "Peer-reviewed research on the forests, ecology and people of West Africa." },
+      { property: "og:type", content: "website" },
     ],
   }),
-  component: Library,
+  component: LibraryHome,
 });
 
-const sections = ["All", "Research", "Review", "Short communication", "Editorial"] as const;
+function LibraryHome() {
+  const [q, setQ] = useState("");
+  const [activeKw, setActiveKw] = useState<string | null>(null);
 
-function Library() {
-  const [query, setQuery] = useState("");
-  const [section, setSection] = useState<(typeof sections)[number]>("All");
+  const allKeywords = useMemo(() => {
+    const s = new Set<string>();
+    articles.forEach(a => a.keywords.forEach(k => s.add(k)));
+    return Array.from(s).slice(0, 20);
+  }, []);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return articles.filter((a) => {
-      if (section !== "All" && a.section !== section) return false;
-      if (!q) return true;
-      return (
-        a.title.toLowerCase().includes(q) ||
-        a.authors.some((x) => x.toLowerCase().includes(q)) ||
-        a.keywords.some((k) => k.toLowerCase().includes(q))
-      );
+    const term = q.trim().toLowerCase();
+    return articles.filter(a => {
+      const matchTerm = !term
+        || a.title.toLowerCase().includes(term)
+        || a.abstract.toLowerCase().includes(term)
+        || a.keywords.some(k => k.toLowerCase().includes(term))
+        || a.authors.some(au => au.toLowerCase().includes(term));
+      const matchKw = !activeKw || a.keywords.includes(activeKw);
+      return matchTerm && matchKw;
     });
-  }, [query, section]);
-
-  const latest = articles[0];
+  }, [q, activeKw]);
 
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-primary/5 to-background">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-[1.4fr_1fr] md:py-24">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
-              Volume 12 · Issue 2 · 2026
-            </p>
-            <h1 className="mt-4 font-serif text-4xl leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
-              Forestry research<br />
-              <span className="italic text-primary">for a greener Ghana.</span>
+      {/* HERO */}
+      <section className="relative isolate overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <img src={heroImg} alt="" width={1920} height={1080} className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/85 via-primary/65 to-background" />
+        </div>
+        <div className="mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pb-28 sm:pt-28 lg:px-8">
+          <div className="max-w-3xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-primary-foreground backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold" /> Open peer review · since 1984
+            </span>
+            <h1 className="mt-5 font-serif text-4xl font-semibold leading-tight text-primary-foreground text-balance sm:text-5xl lg:text-6xl">
+              Ghana Journal <span className="italic text-gold">of Forestry</span>
             </h1>
-            <p className="mt-5 max-w-xl text-base text-muted-foreground md:text-lg">
-              An open-access, peer-reviewed journal publishing original research on forest
-              ecosystems, biodiversity, agroforestry, and sustainable land use across West
-              Africa.
+            <p className="mt-5 max-w-2xl text-base text-primary-foreground/85 sm:text-lg">
+              A peer-reviewed home for original research on tropical forestry, ecology, silviculture and forest livelihoods across Ghana and West Africa.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link to="/submit">
-                  Submit a manuscript <ArrowRight className="ml-1" />
-                </Link>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="bg-gold text-gold-foreground hover:bg-gold/90">
+                <Link to="/submit"><Send className="mr-2 h-4 w-4" /> Submit your manuscript</Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <a href="#current-issue">Browse current issue</a>
+              <Button asChild size="lg" variant="outline" className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <a href="#library"><BookOpen className="mr-2 h-4 w-4" /> Browse the library</a>
               </Button>
             </div>
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6">
-              <div>
-                <dt className="text-xs uppercase tracking-wider text-muted-foreground">Issues / yr</dt>
-                <dd className="mt-1 font-serif text-2xl">4</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wider text-muted-foreground">Open access</dt>
-                <dd className="mt-1 font-serif text-2xl">100%</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wider text-muted-foreground">Articles</dt>
-                <dd className="mt-1 font-serif text-2xl">240+</dd>
-              </div>
-            </dl>
           </div>
-
-          {/* Featured card */}
-          <Link
-            to="/"
-            className="group relative flex flex-col justify-between rounded-2xl border border-border bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
-          >
-            <div>
-              <Badge variant="secondary" className="font-normal">Featured · {latest.section}</Badge>
-              <h2 className="mt-4 font-serif text-2xl leading-snug tracking-tight">
-                {latest.title}
-              </h2>
-              <p className="mt-3 text-sm text-muted-foreground line-clamp-4">
-                {latest.abstract}
-              </p>
-            </div>
-            <div className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">
-              <p className="font-medium text-foreground">{latest.authors.join(", ")}</p>
-              <p className="mt-1">
-                Vol. {latest.volume}({latest.issue}), pp. {latest.pages} · DOI {latest.doi}
-              </p>
-            </div>
-          </Link>
         </div>
       </section>
 
-      {/* Search & filter */}
-      <section id="current-issue" className="border-b border-border bg-background">
-        <div className="mx-auto max-w-6xl px-4 py-12">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="font-serif text-3xl tracking-tight">Library</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Browse published articles. All content is free to read and download.
-              </p>
-            </div>
-            <div className="relative md:w-80">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search title, author, keyword…"
-                className="pl-9"
-              />
-            </div>
+      {/* LIBRARY */}
+      <section id="library" className="mx-auto w-full max-w-7xl flex-1 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="font-serif text-3xl font-semibold text-foreground">The library</h2>
+            <p className="mt-2 text-muted-foreground">Search published research by title, keyword or author.</p>
           </div>
+          <Link to="/guidelines" className="text-sm font-medium text-primary hover:underline">Author guidelines →</Link>
+        </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
-            {sections.map((s) => (
+        <div className="mt-8 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search titles, abstracts, keywords or authors…"
+              className="h-12 pl-10 text-base"
+            />
+          </div>
+          {allKeywords.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
               <button
-                key={s}
-                onClick={() => setSection(s)}
-                className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                  section === s
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-
-          <ul className="mt-8 divide-y divide-border border-y border-border">
-            {filtered.map((a) => (
-              <li key={a.id} className="group py-6">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="rounded bg-secondary px-2 py-0.5 font-medium text-secondary-foreground">
-                    {a.section}
-                  </span>
-                  <span>
-                    Vol. {a.volume}({a.issue}) · {a.pages}
-                  </span>
-                  <span>·</span>
-                  <time>{new Date(a.publishedAt).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" })}</time>
-                </div>
-                <h3 className="mt-2 font-serif text-xl leading-snug tracking-tight group-hover:text-primary">
-                  {a.title}
-                </h3>
-                <p className="mt-1 text-sm font-medium text-foreground/80">{a.authors.join(", ")}</p>
-                <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{a.abstract}</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {a.keywords.map((k) => (
-                    <span key={k} className="text-xs text-muted-foreground">#{k}</span>
-                  ))}
-                </div>
-              </li>
-            ))}
-            {filtered.length === 0 && (
-              <li className="py-12 text-center text-sm text-muted-foreground">
-                No articles match your search.
-              </li>
-            )}
-          </ul>
-        </div>
-      </section>
-
-      {/* For authors / reviewers */}
-      <section className="bg-muted/30">
-        <div className="mx-auto grid max-w-6xl gap-6 px-4 py-16 md:grid-cols-3">
-          {[
-            { icon: FileText, title: "Authors", body: "Submit original research through our editorial system. Average first decision in 6 weeks.", cta: "Submit manuscript", to: "/submit" as const },
-            { icon: Users2, title: "Reviewers", body: "Join our reviewer pool. Upload your CV and indicate your areas of expertise.", cta: "Register as reviewer", to: "/auth" as const },
-            { icon: BookOpen, title: "Readers", body: "All articles are open access under CC BY 4.0. Subscribe to receive new issues.", cta: "Browse library", to: "/" as const },
-          ].map(({ icon: Icon, title, body, cta, to }) => (
-            <div key={title} className="rounded-2xl border border-border bg-card p-6">
-              <Icon className="h-5 w-5 text-primary" />
-              <h3 className="mt-3 font-serif text-xl">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-              <Button asChild variant="link" className="mt-3 h-auto p-0 text-primary">
-                <Link to={to}>{cta} →</Link>
-              </Button>
+                onClick={() => setActiveKw(null)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition ${!activeKw ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}
+              >All</button>
+              {allKeywords.map(k => (
+                <button key={k} onClick={() => setActiveKw(k === activeKw ? null : k)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${activeKw === k ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}
+                >{k}</button>
+              ))}
             </div>
+          )}
+        </div>
+
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.length === 0 && (
+            <div className="col-span-full rounded-xl border border-dashed border-border bg-card/50 p-12 text-center">
+              <BookOpen className="mx-auto h-10 w-10 text-muted-foreground/60" />
+              <h3 className="mt-3 font-serif text-lg text-foreground">No articles match your search</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Try a different keyword or clear your filters.</p>
+            </div>
+          )}
+          {filtered.map(a => (
+            <article key={a.id} className="group flex flex-col rounded-xl border border-border bg-card p-6 shadow-card transition hover:-translate-y-0.5 hover:shadow-elevated">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{new Date(a.publishedAt).getFullYear()}</span>
+                <span>· Vol {a.volume}, No {a.issue}</span>
+                <span>· {a.section}</span>
+              </div>
+              <h3 className="mt-3 font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-primary">{a.title}</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">{a.authors.join(", ")}</p>
+              <p className="mt-3 line-clamp-3 text-sm text-foreground/80">{a.abstract}</p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {a.keywords.slice(0, 4).map(k => (
+                  <Badge key={k} variant="secondary" className="font-normal">{k}</Badge>
+                ))}
+              </div>
+              <div className="mt-auto pt-5 text-sm font-medium text-primary opacity-0 transition group-hover:opacity-100">
+                Read article <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
+              </div>
+            </article>
           ))}
         </div>
       </section>
 
+      {/* FEATURES STRIP */}
+      <section className="border-t border-border/60 bg-secondary/30">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 md:grid-cols-3 lg:px-8">
+          <Feature icon={FileText} title="Rigorous peer review" body="Every submission is triaged by the editorial secretary and assigned to subject reviewers with tracked feedback." />
+          <Feature icon={Users} title="Author-centred workflow" body="Track your manuscript through every stage, respond to reviewers, and approve the galley before publication." />
+          <Feature icon={BookOpen} title="Open library" body="All published articles are openly accessible to readers, scholars and policy-makers around the world." />
+        </div>
+      </section>
+
       <SiteFooter />
+    </div>
+  );
+}
+
+function Feature({ icon: Icon, title, body }: { icon: typeof FileText; title: string; body: string }) {
+  return (
+    <div>
+      <span className="grid h-10 w-10 place-items-center rounded-md bg-primary/10 text-primary">
+        <Icon className="h-5 w-5" />
+      </span>
+      <h3 className="mt-4 font-serif text-lg font-semibold text-foreground">{title}</h3>
+      <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>
     </div>
   );
 }
