@@ -151,8 +151,13 @@ function LibraryHome() {
                   <Badge key={k} variant="secondary" className="font-normal">{k}</Badge>
                 ))}
               </div>
-              <div className="mt-auto pt-5 text-sm font-medium text-primary opacity-0 transition group-hover:opacity-100">
-                Read article <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
+              <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+                <Button size="sm" variant="outline" onClick={() => downloadArticle(a)}>
+                  <Download className="mr-1.5 h-3.5 w-3.5" /> Download PDF
+                </Button>
+                <span className="text-sm font-medium text-primary opacity-0 transition group-hover:opacity-100">
+                  Read <ArrowRight className="ml-1 inline h-3.5 w-3.5" />
+                </span>
               </div>
             </article>
           ))}
