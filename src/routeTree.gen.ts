@@ -12,9 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AuthorRouteImport } from './routes/author'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthorIndexRouteImport } from './routes/author.index'
+import { Route as AuthorSubmitRouteImport } from './routes/author.submit'
+import { Route as AuthorProfileRouteImport } from './routes/author.profile'
+import { Route as AuthorManuscriptsIdRouteImport } from './routes/author.manuscripts.$id'
+import { Route as AuthorManuscriptsIdReviseRouteImport } from './routes/author.manuscripts.$id.revise'
+import { Route as AuthorManuscriptsIdEthicsRouteImport } from './routes/author.manuscripts.$id.ethics'
 
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
@@ -29,6 +36,11 @@ const GuidelinesRoute = GuidelinesRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthorRoute = AuthorRouteImport.update({
+  id: '/author',
+  path: '/author',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -46,14 +58,53 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthorIndexRoute = AuthorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthorRoute,
+} as any)
+const AuthorSubmitRoute = AuthorSubmitRouteImport.update({
+  id: '/submit',
+  path: '/submit',
+  getParentRoute: () => AuthorRoute,
+} as any)
+const AuthorProfileRoute = AuthorProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthorRoute,
+} as any)
+const AuthorManuscriptsIdRoute = AuthorManuscriptsIdRouteImport.update({
+  id: '/manuscripts/$id',
+  path: '/manuscripts/$id',
+  getParentRoute: () => AuthorRoute,
+} as any)
+const AuthorManuscriptsIdReviseRoute =
+  AuthorManuscriptsIdReviseRouteImport.update({
+    id: '/revise',
+    path: '/revise',
+    getParentRoute: () => AuthorManuscriptsIdRoute,
+  } as any)
+const AuthorManuscriptsIdEthicsRoute =
+  AuthorManuscriptsIdEthicsRouteImport.update({
+    id: '/ethics',
+    path: '/ethics',
+    getParentRoute: () => AuthorManuscriptsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/author': typeof AuthorRouteWithChildren
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
   '/submit': typeof SubmitRoute
+  '/author/profile': typeof AuthorProfileRoute
+  '/author/submit': typeof AuthorSubmitRoute
+  '/author/': typeof AuthorIndexRoute
+  '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
+  '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,35 +113,81 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
   '/submit': typeof SubmitRoute
+  '/author/profile': typeof AuthorProfileRoute
+  '/author/submit': typeof AuthorSubmitRoute
+  '/author': typeof AuthorIndexRoute
+  '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
+  '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
+  '/author': typeof AuthorRouteWithChildren
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
   '/submit': typeof SubmitRoute
+  '/author/profile': typeof AuthorProfileRoute
+  '/author/submit': typeof AuthorSubmitRoute
+  '/author/': typeof AuthorIndexRoute
+  '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
+  '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/auth' | '/contact' | '/guidelines' | '/submit'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/author'
+    | '/contact'
+    | '/guidelines'
+    | '/submit'
+    | '/author/profile'
+    | '/author/submit'
+    | '/author/'
+    | '/author/manuscripts/$id'
+    | '/author/manuscripts/$id/ethics'
+    | '/author/manuscripts/$id/revise'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/auth' | '/contact' | '/guidelines' | '/submit'
-  id:
-    | '__root__'
+  to:
     | '/'
     | '/about'
     | '/auth'
     | '/contact'
     | '/guidelines'
     | '/submit'
+    | '/author/profile'
+    | '/author/submit'
+    | '/author'
+    | '/author/manuscripts/$id'
+    | '/author/manuscripts/$id/ethics'
+    | '/author/manuscripts/$id/revise'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/author'
+    | '/contact'
+    | '/guidelines'
+    | '/submit'
+    | '/author/profile'
+    | '/author/submit'
+    | '/author/'
+    | '/author/manuscripts/$id'
+    | '/author/manuscripts/$id/ethics'
+    | '/author/manuscripts/$id/revise'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
+  AuthorRoute: typeof AuthorRouteWithChildren
   ContactRoute: typeof ContactRoute
   GuidelinesRoute: typeof GuidelinesRoute
   SubmitRoute: typeof SubmitRoute
@@ -119,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/author': {
+      id: '/author'
+      path: '/author'
+      fullPath: '/author'
+      preLoaderRoute: typeof AuthorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -140,13 +244,86 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/author/': {
+      id: '/author/'
+      path: '/'
+      fullPath: '/author/'
+      preLoaderRoute: typeof AuthorIndexRouteImport
+      parentRoute: typeof AuthorRoute
+    }
+    '/author/submit': {
+      id: '/author/submit'
+      path: '/submit'
+      fullPath: '/author/submit'
+      preLoaderRoute: typeof AuthorSubmitRouteImport
+      parentRoute: typeof AuthorRoute
+    }
+    '/author/profile': {
+      id: '/author/profile'
+      path: '/profile'
+      fullPath: '/author/profile'
+      preLoaderRoute: typeof AuthorProfileRouteImport
+      parentRoute: typeof AuthorRoute
+    }
+    '/author/manuscripts/$id': {
+      id: '/author/manuscripts/$id'
+      path: '/manuscripts/$id'
+      fullPath: '/author/manuscripts/$id'
+      preLoaderRoute: typeof AuthorManuscriptsIdRouteImport
+      parentRoute: typeof AuthorRoute
+    }
+    '/author/manuscripts/$id/revise': {
+      id: '/author/manuscripts/$id/revise'
+      path: '/revise'
+      fullPath: '/author/manuscripts/$id/revise'
+      preLoaderRoute: typeof AuthorManuscriptsIdReviseRouteImport
+      parentRoute: typeof AuthorManuscriptsIdRoute
+    }
+    '/author/manuscripts/$id/ethics': {
+      id: '/author/manuscripts/$id/ethics'
+      path: '/ethics'
+      fullPath: '/author/manuscripts/$id/ethics'
+      preLoaderRoute: typeof AuthorManuscriptsIdEthicsRouteImport
+      parentRoute: typeof AuthorManuscriptsIdRoute
+    }
   }
 }
+
+interface AuthorManuscriptsIdRouteChildren {
+  AuthorManuscriptsIdEthicsRoute: typeof AuthorManuscriptsIdEthicsRoute
+  AuthorManuscriptsIdReviseRoute: typeof AuthorManuscriptsIdReviseRoute
+}
+
+const AuthorManuscriptsIdRouteChildren: AuthorManuscriptsIdRouteChildren = {
+  AuthorManuscriptsIdEthicsRoute: AuthorManuscriptsIdEthicsRoute,
+  AuthorManuscriptsIdReviseRoute: AuthorManuscriptsIdReviseRoute,
+}
+
+const AuthorManuscriptsIdRouteWithChildren =
+  AuthorManuscriptsIdRoute._addFileChildren(AuthorManuscriptsIdRouteChildren)
+
+interface AuthorRouteChildren {
+  AuthorProfileRoute: typeof AuthorProfileRoute
+  AuthorSubmitRoute: typeof AuthorSubmitRoute
+  AuthorIndexRoute: typeof AuthorIndexRoute
+  AuthorManuscriptsIdRoute: typeof AuthorManuscriptsIdRouteWithChildren
+}
+
+const AuthorRouteChildren: AuthorRouteChildren = {
+  AuthorProfileRoute: AuthorProfileRoute,
+  AuthorSubmitRoute: AuthorSubmitRoute,
+  AuthorIndexRoute: AuthorIndexRoute,
+  AuthorManuscriptsIdRoute: AuthorManuscriptsIdRouteWithChildren,
+}
+
+const AuthorRouteWithChildren =
+  AuthorRoute._addFileChildren(AuthorRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
+  AuthorRoute: AuthorRouteWithChildren,
   ContactRoute: ContactRoute,
   GuidelinesRoute: GuidelinesRoute,
   SubmitRoute: SubmitRoute,
