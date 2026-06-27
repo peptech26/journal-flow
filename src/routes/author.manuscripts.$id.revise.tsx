@@ -19,7 +19,7 @@ export const Route = createFileRoute("/author/manuscripts/$id/revise")({
 });
 
 function RevisePage() {
-  const m = Route.useLoaderData();
+  const m = Route.useLoaderData() as Manuscript;
   const nav = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);

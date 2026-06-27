@@ -25,7 +25,7 @@ export const Route = createFileRoute("/author/manuscripts/$id")({
 });
 
 function ManuscriptDetail() {
-  const m = Route.useLoaderData();
+  const m = Route.useLoaderData() as Manuscript;
 
   return (
     <div>

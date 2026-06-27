@@ -43,7 +43,7 @@ const FORMS: { key: FormKey; title: string; template: string }[] = [
 ];
 
 function EthicsPage() {
-  const m = Route.useLoaderData();
+  const m = Route.useLoaderData() as Manuscript;
   const [signed, setSigned] = useState<Record<FormKey, string>>({ coi: "", data: "", copyright: "" });
 
   const sign = (key: FormKey, name: string, body: string) => {
