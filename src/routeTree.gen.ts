@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmitRouteImport } from './routes/submit'
+import { Route as SecretaryRouteImport } from './routes/secretary'
 import { Route as ReviewerRouteImport } from './routes/reviewer'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -17,8 +18,14 @@ import { Route as AuthorRouteImport } from './routes/author'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SecretaryIndexRouteImport } from './routes/secretary.index'
 import { Route as ReviewerIndexRouteImport } from './routes/reviewer.index'
 import { Route as AuthorIndexRouteImport } from './routes/author.index'
+import { Route as SecretaryStatsRouteImport } from './routes/secretary.stats'
+import { Route as SecretaryReviewersRouteImport } from './routes/secretary.reviewers'
+import { Route as SecretaryRemindersRouteImport } from './routes/secretary.reminders'
+import { Route as SecretaryPlagiarismRouteImport } from './routes/secretary.plagiarism'
+import { Route as SecretaryCommunicationsRouteImport } from './routes/secretary.communications'
 import { Route as ReviewerProfileRouteImport } from './routes/reviewer.profile'
 import { Route as ReviewerEthicsRouteImport } from './routes/reviewer.ethics'
 import { Route as AuthorSubmitRouteImport } from './routes/author.submit'
@@ -33,6 +40,11 @@ import { Route as AuthorManuscriptsIdEthicsRouteImport } from './routes/author.m
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecretaryRoute = SecretaryRouteImport.update({
+  id: '/secretary',
+  path: '/secretary',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReviewerRoute = ReviewerRouteImport.update({
@@ -70,6 +82,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SecretaryIndexRoute = SecretaryIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SecretaryRoute,
+} as any)
 const ReviewerIndexRoute = ReviewerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -79,6 +96,31 @@ const AuthorIndexRoute = AuthorIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthorRoute,
+} as any)
+const SecretaryStatsRoute = SecretaryStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => SecretaryRoute,
+} as any)
+const SecretaryReviewersRoute = SecretaryReviewersRouteImport.update({
+  id: '/reviewers',
+  path: '/reviewers',
+  getParentRoute: () => SecretaryRoute,
+} as any)
+const SecretaryRemindersRoute = SecretaryRemindersRouteImport.update({
+  id: '/reminders',
+  path: '/reminders',
+  getParentRoute: () => SecretaryRoute,
+} as any)
+const SecretaryPlagiarismRoute = SecretaryPlagiarismRouteImport.update({
+  id: '/plagiarism',
+  path: '/plagiarism',
+  getParentRoute: () => SecretaryRoute,
+} as any)
+const SecretaryCommunicationsRoute = SecretaryCommunicationsRouteImport.update({
+  id: '/communications',
+  path: '/communications',
+  getParentRoute: () => SecretaryRoute,
 } as any)
 const ReviewerProfileRoute = ReviewerProfileRouteImport.update({
   id: '/profile',
@@ -142,13 +184,20 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
   '/reviewer': typeof ReviewerRouteWithChildren
+  '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
+  '/secretary/communications': typeof SecretaryCommunicationsRoute
+  '/secretary/plagiarism': typeof SecretaryPlagiarismRoute
+  '/secretary/reminders': typeof SecretaryRemindersRoute
+  '/secretary/reviewers': typeof SecretaryReviewersRoute
+  '/secretary/stats': typeof SecretaryStatsRoute
   '/author/': typeof AuthorIndexRoute
   '/reviewer/': typeof ReviewerIndexRoute
+  '/secretary/': typeof SecretaryIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
   '/reviewer/assignments/$id': typeof ReviewerAssignmentsIdRoute
   '/reviewer/invitations/$id': typeof ReviewerInvitationsIdRoute
@@ -167,8 +216,14 @@ export interface FileRoutesByTo {
   '/author/submit': typeof AuthorSubmitRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
+  '/secretary/communications': typeof SecretaryCommunicationsRoute
+  '/secretary/plagiarism': typeof SecretaryPlagiarismRoute
+  '/secretary/reminders': typeof SecretaryRemindersRoute
+  '/secretary/reviewers': typeof SecretaryReviewersRoute
+  '/secretary/stats': typeof SecretaryStatsRoute
   '/author': typeof AuthorIndexRoute
   '/reviewer': typeof ReviewerIndexRoute
+  '/secretary': typeof SecretaryIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
   '/reviewer/assignments/$id': typeof ReviewerAssignmentsIdRoute
   '/reviewer/invitations/$id': typeof ReviewerInvitationsIdRoute
@@ -185,13 +240,20 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
   '/reviewer': typeof ReviewerRouteWithChildren
+  '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
+  '/secretary/communications': typeof SecretaryCommunicationsRoute
+  '/secretary/plagiarism': typeof SecretaryPlagiarismRoute
+  '/secretary/reminders': typeof SecretaryRemindersRoute
+  '/secretary/reviewers': typeof SecretaryReviewersRoute
+  '/secretary/stats': typeof SecretaryStatsRoute
   '/author/': typeof AuthorIndexRoute
   '/reviewer/': typeof ReviewerIndexRoute
+  '/secretary/': typeof SecretaryIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
   '/reviewer/assignments/$id': typeof ReviewerAssignmentsIdRoute
   '/reviewer/invitations/$id': typeof ReviewerInvitationsIdRoute
@@ -209,13 +271,20 @@ export interface FileRouteTypes {
     | '/contact'
     | '/guidelines'
     | '/reviewer'
+    | '/secretary'
     | '/submit'
     | '/author/profile'
     | '/author/submit'
     | '/reviewer/ethics'
     | '/reviewer/profile'
+    | '/secretary/communications'
+    | '/secretary/plagiarism'
+    | '/secretary/reminders'
+    | '/secretary/reviewers'
+    | '/secretary/stats'
     | '/author/'
     | '/reviewer/'
+    | '/secretary/'
     | '/author/manuscripts/$id'
     | '/reviewer/assignments/$id'
     | '/reviewer/invitations/$id'
@@ -234,8 +303,14 @@ export interface FileRouteTypes {
     | '/author/submit'
     | '/reviewer/ethics'
     | '/reviewer/profile'
+    | '/secretary/communications'
+    | '/secretary/plagiarism'
+    | '/secretary/reminders'
+    | '/secretary/reviewers'
+    | '/secretary/stats'
     | '/author'
     | '/reviewer'
+    | '/secretary'
     | '/author/manuscripts/$id'
     | '/reviewer/assignments/$id'
     | '/reviewer/invitations/$id'
@@ -251,13 +326,20 @@ export interface FileRouteTypes {
     | '/contact'
     | '/guidelines'
     | '/reviewer'
+    | '/secretary'
     | '/submit'
     | '/author/profile'
     | '/author/submit'
     | '/reviewer/ethics'
     | '/reviewer/profile'
+    | '/secretary/communications'
+    | '/secretary/plagiarism'
+    | '/secretary/reminders'
+    | '/secretary/reviewers'
+    | '/secretary/stats'
     | '/author/'
     | '/reviewer/'
+    | '/secretary/'
     | '/author/manuscripts/$id'
     | '/reviewer/assignments/$id'
     | '/reviewer/invitations/$id'
@@ -274,6 +356,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   GuidelinesRoute: typeof GuidelinesRoute
   ReviewerRoute: typeof ReviewerRouteWithChildren
+  SecretaryRoute: typeof SecretaryRouteWithChildren
   SubmitRoute: typeof SubmitRoute
 }
 
@@ -284,6 +367,13 @@ declare module '@tanstack/react-router' {
       path: '/submit'
       fullPath: '/submit'
       preLoaderRoute: typeof SubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/secretary': {
+      id: '/secretary'
+      path: '/secretary'
+      fullPath: '/secretary'
+      preLoaderRoute: typeof SecretaryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reviewer': {
@@ -335,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/secretary/': {
+      id: '/secretary/'
+      path: '/'
+      fullPath: '/secretary/'
+      preLoaderRoute: typeof SecretaryIndexRouteImport
+      parentRoute: typeof SecretaryRoute
+    }
     '/reviewer/': {
       id: '/reviewer/'
       path: '/'
@@ -348,6 +445,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/author/'
       preLoaderRoute: typeof AuthorIndexRouteImport
       parentRoute: typeof AuthorRoute
+    }
+    '/secretary/stats': {
+      id: '/secretary/stats'
+      path: '/stats'
+      fullPath: '/secretary/stats'
+      preLoaderRoute: typeof SecretaryStatsRouteImport
+      parentRoute: typeof SecretaryRoute
+    }
+    '/secretary/reviewers': {
+      id: '/secretary/reviewers'
+      path: '/reviewers'
+      fullPath: '/secretary/reviewers'
+      preLoaderRoute: typeof SecretaryReviewersRouteImport
+      parentRoute: typeof SecretaryRoute
+    }
+    '/secretary/reminders': {
+      id: '/secretary/reminders'
+      path: '/reminders'
+      fullPath: '/secretary/reminders'
+      preLoaderRoute: typeof SecretaryRemindersRouteImport
+      parentRoute: typeof SecretaryRoute
+    }
+    '/secretary/plagiarism': {
+      id: '/secretary/plagiarism'
+      path: '/plagiarism'
+      fullPath: '/secretary/plagiarism'
+      preLoaderRoute: typeof SecretaryPlagiarismRouteImport
+      parentRoute: typeof SecretaryRoute
+    }
+    '/secretary/communications': {
+      id: '/secretary/communications'
+      path: '/communications'
+      fullPath: '/secretary/communications'
+      preLoaderRoute: typeof SecretaryCommunicationsRouteImport
+      parentRoute: typeof SecretaryRoute
     }
     '/reviewer/profile': {
       id: '/reviewer/profile'
@@ -474,6 +606,28 @@ const ReviewerRouteWithChildren = ReviewerRoute._addFileChildren(
   ReviewerRouteChildren,
 )
 
+interface SecretaryRouteChildren {
+  SecretaryCommunicationsRoute: typeof SecretaryCommunicationsRoute
+  SecretaryPlagiarismRoute: typeof SecretaryPlagiarismRoute
+  SecretaryRemindersRoute: typeof SecretaryRemindersRoute
+  SecretaryReviewersRoute: typeof SecretaryReviewersRoute
+  SecretaryStatsRoute: typeof SecretaryStatsRoute
+  SecretaryIndexRoute: typeof SecretaryIndexRoute
+}
+
+const SecretaryRouteChildren: SecretaryRouteChildren = {
+  SecretaryCommunicationsRoute: SecretaryCommunicationsRoute,
+  SecretaryPlagiarismRoute: SecretaryPlagiarismRoute,
+  SecretaryRemindersRoute: SecretaryRemindersRoute,
+  SecretaryReviewersRoute: SecretaryReviewersRoute,
+  SecretaryStatsRoute: SecretaryStatsRoute,
+  SecretaryIndexRoute: SecretaryIndexRoute,
+}
+
+const SecretaryRouteWithChildren = SecretaryRoute._addFileChildren(
+  SecretaryRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -482,6 +636,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   GuidelinesRoute: GuidelinesRoute,
   ReviewerRoute: ReviewerRouteWithChildren,
+  SecretaryRoute: SecretaryRouteWithChildren,
   SubmitRoute: SubmitRoute,
 }
 export const routeTree = rootRouteImport
