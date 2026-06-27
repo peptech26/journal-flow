@@ -10,15 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmitRouteImport } from './routes/submit'
+import { Route as ReviewerRouteImport } from './routes/reviewer'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthorRouteImport } from './routes/author'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReviewerIndexRouteImport } from './routes/reviewer.index'
 import { Route as AuthorIndexRouteImport } from './routes/author.index'
 import { Route as AuthorSubmitRouteImport } from './routes/author.submit'
 import { Route as AuthorProfileRouteImport } from './routes/author.profile'
+import { Route as ReviewerInvitationsIndexRouteImport } from './routes/reviewer.invitations.index'
 import { Route as AuthorManuscriptsIdRouteImport } from './routes/author.manuscripts.$id'
 import { Route as AuthorManuscriptsIdReviseRouteImport } from './routes/author.manuscripts.$id.revise'
 import { Route as AuthorManuscriptsIdEthicsRouteImport } from './routes/author.manuscripts.$id.ethics'
@@ -26,6 +29,11 @@ import { Route as AuthorManuscriptsIdEthicsRouteImport } from './routes/author.m
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewerRoute = ReviewerRouteImport.update({
+  id: '/reviewer',
+  path: '/reviewer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidelinesRoute = GuidelinesRouteImport.update({
@@ -58,6 +66,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewerIndexRoute = ReviewerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ReviewerRoute,
+} as any)
 const AuthorIndexRoute = AuthorIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -73,6 +86,12 @@ const AuthorProfileRoute = AuthorProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthorRoute,
 } as any)
+const ReviewerInvitationsIndexRoute =
+  ReviewerInvitationsIndexRouteImport.update({
+    id: '/invitations/',
+    path: '/invitations/',
+    getParentRoute: () => ReviewerRoute,
+  } as any)
 const AuthorManuscriptsIdRoute = AuthorManuscriptsIdRouteImport.update({
   id: '/manuscripts/$id',
   path: '/manuscripts/$id',
@@ -98,11 +117,14 @@ export interface FileRoutesByFullPath {
   '/author': typeof AuthorRouteWithChildren
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
+  '/reviewer': typeof ReviewerRouteWithChildren
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/author/': typeof AuthorIndexRoute
+  '/reviewer/': typeof ReviewerIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/reviewer/invitations/': typeof ReviewerInvitationsIndexRoute
   '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
   '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
 }
@@ -116,7 +138,9 @@ export interface FileRoutesByTo {
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/author': typeof AuthorIndexRoute
+  '/reviewer': typeof ReviewerIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/reviewer/invitations': typeof ReviewerInvitationsIndexRoute
   '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
   '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
 }
@@ -128,11 +152,14 @@ export interface FileRoutesById {
   '/author': typeof AuthorRouteWithChildren
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
+  '/reviewer': typeof ReviewerRouteWithChildren
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/author/': typeof AuthorIndexRoute
+  '/reviewer/': typeof ReviewerIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
+  '/reviewer/invitations/': typeof ReviewerInvitationsIndexRoute
   '/author/manuscripts/$id/ethics': typeof AuthorManuscriptsIdEthicsRoute
   '/author/manuscripts/$id/revise': typeof AuthorManuscriptsIdReviseRoute
 }
@@ -145,11 +172,14 @@ export interface FileRouteTypes {
     | '/author'
     | '/contact'
     | '/guidelines'
+    | '/reviewer'
     | '/submit'
     | '/author/profile'
     | '/author/submit'
     | '/author/'
+    | '/reviewer/'
     | '/author/manuscripts/$id'
+    | '/reviewer/invitations/'
     | '/author/manuscripts/$id/ethics'
     | '/author/manuscripts/$id/revise'
   fileRoutesByTo: FileRoutesByTo
@@ -163,7 +193,9 @@ export interface FileRouteTypes {
     | '/author/profile'
     | '/author/submit'
     | '/author'
+    | '/reviewer'
     | '/author/manuscripts/$id'
+    | '/reviewer/invitations'
     | '/author/manuscripts/$id/ethics'
     | '/author/manuscripts/$id/revise'
   id:
@@ -174,11 +206,14 @@ export interface FileRouteTypes {
     | '/author'
     | '/contact'
     | '/guidelines'
+    | '/reviewer'
     | '/submit'
     | '/author/profile'
     | '/author/submit'
     | '/author/'
+    | '/reviewer/'
     | '/author/manuscripts/$id'
+    | '/reviewer/invitations/'
     | '/author/manuscripts/$id/ethics'
     | '/author/manuscripts/$id/revise'
   fileRoutesById: FileRoutesById
@@ -190,6 +225,7 @@ export interface RootRouteChildren {
   AuthorRoute: typeof AuthorRouteWithChildren
   ContactRoute: typeof ContactRoute
   GuidelinesRoute: typeof GuidelinesRoute
+  ReviewerRoute: typeof ReviewerRouteWithChildren
   SubmitRoute: typeof SubmitRoute
 }
 
@@ -200,6 +236,13 @@ declare module '@tanstack/react-router' {
       path: '/submit'
       fullPath: '/submit'
       preLoaderRoute: typeof SubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviewer': {
+      id: '/reviewer'
+      path: '/reviewer'
+      fullPath: '/reviewer'
+      preLoaderRoute: typeof ReviewerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guidelines': {
@@ -244,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reviewer/': {
+      id: '/reviewer/'
+      path: '/'
+      fullPath: '/reviewer/'
+      preLoaderRoute: typeof ReviewerIndexRouteImport
+      parentRoute: typeof ReviewerRoute
+    }
     '/author/': {
       id: '/author/'
       path: '/'
@@ -264,6 +314,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/author/profile'
       preLoaderRoute: typeof AuthorProfileRouteImport
       parentRoute: typeof AuthorRoute
+    }
+    '/reviewer/invitations/': {
+      id: '/reviewer/invitations/'
+      path: '/invitations'
+      fullPath: '/reviewer/invitations/'
+      preLoaderRoute: typeof ReviewerInvitationsIndexRouteImport
+      parentRoute: typeof ReviewerRoute
     }
     '/author/manuscripts/$id': {
       id: '/author/manuscripts/$id'
@@ -319,6 +376,20 @@ const AuthorRouteChildren: AuthorRouteChildren = {
 const AuthorRouteWithChildren =
   AuthorRoute._addFileChildren(AuthorRouteChildren)
 
+interface ReviewerRouteChildren {
+  ReviewerIndexRoute: typeof ReviewerIndexRoute
+  ReviewerInvitationsIndexRoute: typeof ReviewerInvitationsIndexRoute
+}
+
+const ReviewerRouteChildren: ReviewerRouteChildren = {
+  ReviewerIndexRoute: ReviewerIndexRoute,
+  ReviewerInvitationsIndexRoute: ReviewerInvitationsIndexRoute,
+}
+
+const ReviewerRouteWithChildren = ReviewerRoute._addFileChildren(
+  ReviewerRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -326,6 +397,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthorRoute: AuthorRouteWithChildren,
   ContactRoute: ContactRoute,
   GuidelinesRoute: GuidelinesRoute,
+  ReviewerRoute: ReviewerRouteWithChildren,
   SubmitRoute: SubmitRoute,
 }
 export const routeTree = rootRouteImport

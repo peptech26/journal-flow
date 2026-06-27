@@ -21,6 +21,7 @@ export function SiteHeader() {
           <Link to="/about" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>About</Link>
           <Link to="/contact" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Contact</Link>
           <Link to="/author" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Author</Link>
+          <Link to="/reviewer" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Reviewer</Link>
         </nav>
         <div className="flex items-center gap-2">
           <Button asChild size="sm" variant="ghost"><Link to="/auth">Sign in</Link></Button>
