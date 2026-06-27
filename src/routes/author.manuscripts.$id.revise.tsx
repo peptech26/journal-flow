@@ -5,10 +5,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { getManuscript } from "@/lib/mock-manuscripts";
+import { getManuscript, type Manuscript } from "@/lib/mock-manuscripts";
 
 export const Route = createFileRoute("/author/manuscripts/$id/revise")({
-  loader: ({ params }) => {
+  loader: ({ params }): Manuscript => {
     const m = getManuscript(params.id);
     if (!m) throw notFound();
     return m;

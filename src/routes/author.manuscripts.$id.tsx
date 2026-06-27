@@ -3,10 +3,10 @@ import { ArrowLeft, FileText, MessageSquare, Clock, Mail, Shield, Upload, Histor
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/author/status-badge";
-import { getManuscript } from "@/lib/mock-manuscripts";
+import { getManuscript, type Manuscript } from "@/lib/mock-manuscripts";
 
 export const Route = createFileRoute("/author/manuscripts/$id")({
-  loader: ({ params }) => {
+  loader: ({ params }): Manuscript => {
     const m = getManuscript(params.id);
     if (!m) throw notFound();
     return m;
