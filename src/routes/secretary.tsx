@@ -6,14 +6,14 @@ export const Route = createFileRoute("/secretary")({
   component: SecretaryLayout,
 });
 
-const tabs = [
+const tabs: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
   { to: "/secretary", label: "Triage", icon: LayoutDashboard, exact: true },
   { to: "/secretary/reviewers", label: "Reviewers", icon: Users },
   { to: "/secretary/reminders", label: "Reminders", icon: BellRing },
   { to: "/secretary/plagiarism", label: "Plagiarism", icon: ShieldAlert },
   { to: "/secretary/stats", label: "Statistics", icon: BarChart3 },
   { to: "/secretary/communications", label: "Comms hub", icon: Inbox },
-] as const;
+];
 
 function SecretaryLayout() {
   return (
