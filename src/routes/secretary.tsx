@@ -28,7 +28,7 @@ function SecretaryLayout() {
           {tabs.map((t) => (
             <Link
               key={t.to}
-              to={t.to}
+              to={t.to as string}
               activeOptions={t.exact ? { exact: true } : undefined}
               className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-muted-foreground hover:text-foreground"
               activeProps={{ className: "border-primary/40 bg-primary/5 text-foreground" }}
