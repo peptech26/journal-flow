@@ -24,7 +24,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
-  const [signupRole, setSignupRole] = useState<"author" | "reviewer">("author");
+  const [signupRole, setSignupRole] = useState<"author" | "reviewer" | "secretary" | "eic">("author");
 
   function notWired(label: string) {
     toast.info(`${label} — connect your database to enable.`);
@@ -33,7 +33,15 @@ function AuthPage() {
   function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     toast.success("Account created — welcome!");
-    navigate({ to: signupRole === "reviewer" ? "/reviewer" : "/author" });
+    const dashboardPath =
+      signupRole === "reviewer"
+        ? "/reviewer"
+        : signupRole === "secretary"
+          ? "/secretary"
+          : signupRole === "eic"
+            ? "/eic"
+            : "/author";
+    navigate({ to: dashboardPath });
   }
 
 
@@ -101,6 +109,8 @@ function AuthPage() {
                     <SelectContent>
                       <SelectItem value="author">Author — submit manuscripts</SelectItem>
                       <SelectItem value="reviewer">Reviewer — peer review submissions</SelectItem>
+                      <SelectItem value="secretary">Editorial Secretary — manage workflow</SelectItem>
+                      <SelectItem value="eic">Editor-in-Chief — oversee journal</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">Editorial staff accounts are provisioned by the editorial office.</p>
