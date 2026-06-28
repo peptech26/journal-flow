@@ -1,5 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Lock } from "lucide-react";
+
+const CLAIMED_ROLES_KEY = "gjf:claimed-singleton-roles";
+type SingletonRole = "secretary" | "eic";
+function readClaimedRoles(): SingletonRole[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(CLAIMED_ROLES_KEY) ?? "[]"); } catch { return []; }
+}
+function claimRole(role: SingletonRole) {
+  if (typeof window === "undefined") return;
+  const current = readClaimedRoles();
+  if (!current.includes(role)) {
+    localStorage.setItem(CLAIMED_ROLES_KEY, JSON.stringify([...current, role]));
+  }
+}
 
 import { Leaf } from "lucide-react";
 import { toast } from "sonner";
