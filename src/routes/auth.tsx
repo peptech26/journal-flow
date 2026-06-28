@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+
 import { Leaf } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -20,12 +21,21 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const navigate = useNavigate();
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [signupRole, setSignupRole] = useState<"author" | "reviewer">("author");
 
   function notWired(label: string) {
     toast.info(`${label} — connect your database to enable.`);
   }
+
+  function handleSignup(e: React.FormEvent) {
+    e.preventDefault();
+    toast.success("Account created — welcome!");
+    navigate({ to: signupRole === "reviewer" ? "/reviewer" : "/author" });
+  }
+
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -80,27 +90,25 @@ function AuthPage() {
               </form>
             </TabsContent>
             <TabsContent value="signup">
-              <form onSubmit={(e) => { e.preventDefault(); notWired("Account creation"); }} className="space-y-4">
+              <form onSubmit={handleSignup} className="space-y-4">
                 <Field label="Full name" name="full_name" required />
                 <Field label="Email" name="email" type="email" required />
                 <Field label="Password" name="password" type="password" required minLength={8} />
                 <div className="space-y-1.5">
                   <Label htmlFor="requested_role">I'm joining as</Label>
-                  <Select name="requested_role" defaultValue="author">
+                  <Select name="requested_role" value={signupRole} onValueChange={(v) => setSignupRole(v as "author" | "reviewer")}>
                     <SelectTrigger id="requested_role"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="author">Author — submit manuscripts</SelectItem>
                       <SelectItem value="reviewer">Reviewer — peer review submissions</SelectItem>
-                      <SelectItem value="editorial_secretary">Editorial secretary</SelectItem>
-                      <SelectItem value="editor_in_chief">Editor-in-chief</SelectItem>
-                      <SelectItem value="admin">Administrator</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">Editor and admin accounts are reviewed by the editorial office.</p>
+                  <p className="text-xs text-muted-foreground">Editorial staff accounts are provisioned by the editorial office.</p>
                 </div>
                 <Button type="submit" className="w-full">Create account</Button>
               </form>
             </TabsContent>
+
           </Tabs>
         </div>
       </div>
