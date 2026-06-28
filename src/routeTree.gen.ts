@@ -13,6 +13,7 @@ import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SecretaryRouteImport } from './routes/secretary'
 import { Route as ReviewerRouteImport } from './routes/reviewer'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
+import { Route as EicRouteImport } from './routes/eic'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthorRouteImport } from './routes/author'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -20,6 +21,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SecretaryIndexRouteImport } from './routes/secretary.index'
 import { Route as ReviewerIndexRouteImport } from './routes/reviewer.index'
+import { Route as EicIndexRouteImport } from './routes/eic.index'
 import { Route as AuthorIndexRouteImport } from './routes/author.index'
 import { Route as SecretaryStatsRouteImport } from './routes/secretary.stats'
 import { Route as SecretaryReviewersRouteImport } from './routes/secretary.reviewers'
@@ -28,6 +30,12 @@ import { Route as SecretaryPlagiarismRouteImport } from './routes/secretary.plag
 import { Route as SecretaryCommunicationsRouteImport } from './routes/secretary.communications'
 import { Route as ReviewerProfileRouteImport } from './routes/reviewer.profile'
 import { Route as ReviewerEthicsRouteImport } from './routes/reviewer.ethics'
+import { Route as EicTriageRouteImport } from './routes/eic.triage'
+import { Route as EicPoliciesRouteImport } from './routes/eic.policies'
+import { Route as EicPerformanceRouteImport } from './routes/eic.performance'
+import { Route as EicDelegatesRouteImport } from './routes/eic.delegates'
+import { Route as EicDecisionsRouteImport } from './routes/eic.decisions'
+import { Route as EicConflictsRouteImport } from './routes/eic.conflicts'
 import { Route as AuthorSubmitRouteImport } from './routes/author.submit'
 import { Route as AuthorProfileRouteImport } from './routes/author.profile'
 import { Route as ReviewerInvitationsIndexRouteImport } from './routes/reviewer.invitations.index'
@@ -55,6 +63,11 @@ const ReviewerRoute = ReviewerRouteImport.update({
 const GuidelinesRoute = GuidelinesRouteImport.update({
   id: '/guidelines',
   path: '/guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EicRoute = EicRouteImport.update({
+  id: '/eic',
+  path: '/eic',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -91,6 +104,11 @@ const ReviewerIndexRoute = ReviewerIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ReviewerRoute,
+} as any)
+const EicIndexRoute = EicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EicRoute,
 } as any)
 const AuthorIndexRoute = AuthorIndexRouteImport.update({
   id: '/',
@@ -131,6 +149,36 @@ const ReviewerEthicsRoute = ReviewerEthicsRouteImport.update({
   id: '/ethics',
   path: '/ethics',
   getParentRoute: () => ReviewerRoute,
+} as any)
+const EicTriageRoute = EicTriageRouteImport.update({
+  id: '/triage',
+  path: '/triage',
+  getParentRoute: () => EicRoute,
+} as any)
+const EicPoliciesRoute = EicPoliciesRouteImport.update({
+  id: '/policies',
+  path: '/policies',
+  getParentRoute: () => EicRoute,
+} as any)
+const EicPerformanceRoute = EicPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => EicRoute,
+} as any)
+const EicDelegatesRoute = EicDelegatesRouteImport.update({
+  id: '/delegates',
+  path: '/delegates',
+  getParentRoute: () => EicRoute,
+} as any)
+const EicDecisionsRoute = EicDecisionsRouteImport.update({
+  id: '/decisions',
+  path: '/decisions',
+  getParentRoute: () => EicRoute,
+} as any)
+const EicConflictsRoute = EicConflictsRouteImport.update({
+  id: '/conflicts',
+  path: '/conflicts',
+  getParentRoute: () => EicRoute,
 } as any)
 const AuthorSubmitRoute = AuthorSubmitRouteImport.update({
   id: '/submit',
@@ -182,12 +230,19 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/author': typeof AuthorRouteWithChildren
   '/contact': typeof ContactRoute
+  '/eic': typeof EicRouteWithChildren
   '/guidelines': typeof GuidelinesRoute
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
+  '/eic/conflicts': typeof EicConflictsRoute
+  '/eic/decisions': typeof EicDecisionsRoute
+  '/eic/delegates': typeof EicDelegatesRoute
+  '/eic/performance': typeof EicPerformanceRoute
+  '/eic/policies': typeof EicPoliciesRoute
+  '/eic/triage': typeof EicTriageRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
   '/secretary/communications': typeof SecretaryCommunicationsRoute
@@ -196,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/secretary/reviewers': typeof SecretaryReviewersRoute
   '/secretary/stats': typeof SecretaryStatsRoute
   '/author/': typeof AuthorIndexRoute
+  '/eic/': typeof EicIndexRoute
   '/reviewer/': typeof ReviewerIndexRoute
   '/secretary/': typeof SecretaryIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
@@ -214,6 +270,12 @@ export interface FileRoutesByTo {
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
+  '/eic/conflicts': typeof EicConflictsRoute
+  '/eic/decisions': typeof EicDecisionsRoute
+  '/eic/delegates': typeof EicDelegatesRoute
+  '/eic/performance': typeof EicPerformanceRoute
+  '/eic/policies': typeof EicPoliciesRoute
+  '/eic/triage': typeof EicTriageRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
   '/secretary/communications': typeof SecretaryCommunicationsRoute
@@ -222,6 +284,7 @@ export interface FileRoutesByTo {
   '/secretary/reviewers': typeof SecretaryReviewersRoute
   '/secretary/stats': typeof SecretaryStatsRoute
   '/author': typeof AuthorIndexRoute
+  '/eic': typeof EicIndexRoute
   '/reviewer': typeof ReviewerIndexRoute
   '/secretary': typeof SecretaryIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
@@ -238,12 +301,19 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/author': typeof AuthorRouteWithChildren
   '/contact': typeof ContactRoute
+  '/eic': typeof EicRouteWithChildren
   '/guidelines': typeof GuidelinesRoute
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
+  '/eic/conflicts': typeof EicConflictsRoute
+  '/eic/decisions': typeof EicDecisionsRoute
+  '/eic/delegates': typeof EicDelegatesRoute
+  '/eic/performance': typeof EicPerformanceRoute
+  '/eic/policies': typeof EicPoliciesRoute
+  '/eic/triage': typeof EicTriageRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
   '/secretary/communications': typeof SecretaryCommunicationsRoute
@@ -252,6 +322,7 @@ export interface FileRoutesById {
   '/secretary/reviewers': typeof SecretaryReviewersRoute
   '/secretary/stats': typeof SecretaryStatsRoute
   '/author/': typeof AuthorIndexRoute
+  '/eic/': typeof EicIndexRoute
   '/reviewer/': typeof ReviewerIndexRoute
   '/secretary/': typeof SecretaryIndexRoute
   '/author/manuscripts/$id': typeof AuthorManuscriptsIdRouteWithChildren
@@ -269,12 +340,19 @@ export interface FileRouteTypes {
     | '/auth'
     | '/author'
     | '/contact'
+    | '/eic'
     | '/guidelines'
     | '/reviewer'
     | '/secretary'
     | '/submit'
     | '/author/profile'
     | '/author/submit'
+    | '/eic/conflicts'
+    | '/eic/decisions'
+    | '/eic/delegates'
+    | '/eic/performance'
+    | '/eic/policies'
+    | '/eic/triage'
     | '/reviewer/ethics'
     | '/reviewer/profile'
     | '/secretary/communications'
@@ -283,6 +361,7 @@ export interface FileRouteTypes {
     | '/secretary/reviewers'
     | '/secretary/stats'
     | '/author/'
+    | '/eic/'
     | '/reviewer/'
     | '/secretary/'
     | '/author/manuscripts/$id'
@@ -301,6 +380,12 @@ export interface FileRouteTypes {
     | '/submit'
     | '/author/profile'
     | '/author/submit'
+    | '/eic/conflicts'
+    | '/eic/decisions'
+    | '/eic/delegates'
+    | '/eic/performance'
+    | '/eic/policies'
+    | '/eic/triage'
     | '/reviewer/ethics'
     | '/reviewer/profile'
     | '/secretary/communications'
@@ -309,6 +394,7 @@ export interface FileRouteTypes {
     | '/secretary/reviewers'
     | '/secretary/stats'
     | '/author'
+    | '/eic'
     | '/reviewer'
     | '/secretary'
     | '/author/manuscripts/$id'
@@ -324,12 +410,19 @@ export interface FileRouteTypes {
     | '/auth'
     | '/author'
     | '/contact'
+    | '/eic'
     | '/guidelines'
     | '/reviewer'
     | '/secretary'
     | '/submit'
     | '/author/profile'
     | '/author/submit'
+    | '/eic/conflicts'
+    | '/eic/decisions'
+    | '/eic/delegates'
+    | '/eic/performance'
+    | '/eic/policies'
+    | '/eic/triage'
     | '/reviewer/ethics'
     | '/reviewer/profile'
     | '/secretary/communications'
@@ -338,6 +431,7 @@ export interface FileRouteTypes {
     | '/secretary/reviewers'
     | '/secretary/stats'
     | '/author/'
+    | '/eic/'
     | '/reviewer/'
     | '/secretary/'
     | '/author/manuscripts/$id'
@@ -354,6 +448,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   AuthorRoute: typeof AuthorRouteWithChildren
   ContactRoute: typeof ContactRoute
+  EicRoute: typeof EicRouteWithChildren
   GuidelinesRoute: typeof GuidelinesRoute
   ReviewerRoute: typeof ReviewerRouteWithChildren
   SecretaryRoute: typeof SecretaryRouteWithChildren
@@ -388,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/guidelines'
       fullPath: '/guidelines'
       preLoaderRoute: typeof GuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/eic': {
+      id: '/eic'
+      path: '/eic'
+      fullPath: '/eic'
+      preLoaderRoute: typeof EicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -438,6 +540,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reviewer/'
       preLoaderRoute: typeof ReviewerIndexRouteImport
       parentRoute: typeof ReviewerRoute
+    }
+    '/eic/': {
+      id: '/eic/'
+      path: '/'
+      fullPath: '/eic/'
+      preLoaderRoute: typeof EicIndexRouteImport
+      parentRoute: typeof EicRoute
     }
     '/author/': {
       id: '/author/'
@@ -494,6 +603,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/reviewer/ethics'
       preLoaderRoute: typeof ReviewerEthicsRouteImport
       parentRoute: typeof ReviewerRoute
+    }
+    '/eic/triage': {
+      id: '/eic/triage'
+      path: '/triage'
+      fullPath: '/eic/triage'
+      preLoaderRoute: typeof EicTriageRouteImport
+      parentRoute: typeof EicRoute
+    }
+    '/eic/policies': {
+      id: '/eic/policies'
+      path: '/policies'
+      fullPath: '/eic/policies'
+      preLoaderRoute: typeof EicPoliciesRouteImport
+      parentRoute: typeof EicRoute
+    }
+    '/eic/performance': {
+      id: '/eic/performance'
+      path: '/performance'
+      fullPath: '/eic/performance'
+      preLoaderRoute: typeof EicPerformanceRouteImport
+      parentRoute: typeof EicRoute
+    }
+    '/eic/delegates': {
+      id: '/eic/delegates'
+      path: '/delegates'
+      fullPath: '/eic/delegates'
+      preLoaderRoute: typeof EicDelegatesRouteImport
+      parentRoute: typeof EicRoute
+    }
+    '/eic/decisions': {
+      id: '/eic/decisions'
+      path: '/decisions'
+      fullPath: '/eic/decisions'
+      preLoaderRoute: typeof EicDecisionsRouteImport
+      parentRoute: typeof EicRoute
+    }
+    '/eic/conflicts': {
+      id: '/eic/conflicts'
+      path: '/conflicts'
+      fullPath: '/eic/conflicts'
+      preLoaderRoute: typeof EicConflictsRouteImport
+      parentRoute: typeof EicRoute
     }
     '/author/submit': {
       id: '/author/submit'
@@ -584,6 +735,28 @@ const AuthorRouteChildren: AuthorRouteChildren = {
 const AuthorRouteWithChildren =
   AuthorRoute._addFileChildren(AuthorRouteChildren)
 
+interface EicRouteChildren {
+  EicConflictsRoute: typeof EicConflictsRoute
+  EicDecisionsRoute: typeof EicDecisionsRoute
+  EicDelegatesRoute: typeof EicDelegatesRoute
+  EicPerformanceRoute: typeof EicPerformanceRoute
+  EicPoliciesRoute: typeof EicPoliciesRoute
+  EicTriageRoute: typeof EicTriageRoute
+  EicIndexRoute: typeof EicIndexRoute
+}
+
+const EicRouteChildren: EicRouteChildren = {
+  EicConflictsRoute: EicConflictsRoute,
+  EicDecisionsRoute: EicDecisionsRoute,
+  EicDelegatesRoute: EicDelegatesRoute,
+  EicPerformanceRoute: EicPerformanceRoute,
+  EicPoliciesRoute: EicPoliciesRoute,
+  EicTriageRoute: EicTriageRoute,
+  EicIndexRoute: EicIndexRoute,
+}
+
+const EicRouteWithChildren = EicRoute._addFileChildren(EicRouteChildren)
+
 interface ReviewerRouteChildren {
   ReviewerEthicsRoute: typeof ReviewerEthicsRoute
   ReviewerProfileRoute: typeof ReviewerProfileRoute
@@ -634,6 +807,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   AuthorRoute: AuthorRouteWithChildren,
   ContactRoute: ContactRoute,
+  EicRoute: EicRouteWithChildren,
   GuidelinesRoute: GuidelinesRoute,
   ReviewerRoute: ReviewerRouteWithChildren,
   SecretaryRoute: SecretaryRouteWithChildren,
@@ -642,13 +816,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
