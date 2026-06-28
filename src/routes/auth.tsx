@@ -132,16 +132,30 @@ function AuthPage() {
                 <Field label="Password" name="password" type="password" required minLength={8} />
                 <div className="space-y-1.5">
                   <Label htmlFor="requested_role">I'm joining as</Label>
-                  <Select name="requested_role" value={signupRole} onValueChange={(v) => setSignupRole(v as "author" | "reviewer")}>
+                  <Select name="requested_role" value={signupRole} onValueChange={(v) => setSignupRole(v as typeof signupRole)}>
                     <SelectTrigger id="requested_role"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="author">Author — submit manuscripts</SelectItem>
                       <SelectItem value="reviewer">Reviewer — peer review submissions</SelectItem>
-                      <SelectItem value="secretary">Editorial Secretary — manage workflow</SelectItem>
-                      <SelectItem value="eic">Editor-in-Chief — oversee journal</SelectItem>
+                      <SelectItem value="secretary" disabled={isLocked("secretary")}>
+                        <span className="flex items-center gap-2">
+                          Editorial Secretary — manage workflow
+                          {isLocked("secretary") && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="eic" disabled={isLocked("eic")}>
+                        <span className="flex items-center gap-2">
+                          Editor-in-Chief — oversee journal
+                          {isLocked("eic") && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        </span>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">Editorial staff accounts are provisioned by the editorial office.</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isLocked("secretary") || isLocked("eic")
+                      ? "Some editorial roles are already filled and locked. Contact the editorial office for access."
+                      : "Editorial staff accounts are provisioned by the editorial office."}
+                  </p>
                 </div>
                 <Button type="submit" className="w-full">Create account</Button>
               </form>
