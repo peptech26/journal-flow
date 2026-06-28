@@ -40,6 +40,11 @@ function AuthPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [signupRole, setSignupRole] = useState<"author" | "reviewer" | "secretary" | "eic">("author");
+  const [claimedRoles, setClaimedRoles] = useState<SingletonRole[]>([]);
+
+  useEffect(() => { setClaimedRoles(readClaimedRoles()); }, []);
+
+  const isLocked = (r: SingletonRole) => claimedRoles.includes(r);
 
   function notWired(label: string) {
     toast.info(`${label} — connect your database to enable.`);
@@ -47,6 +52,14 @@ function AuthPage() {
 
   function handleSignup(e: React.FormEvent) {
     e.preventDefault();
+    if ((signupRole === "secretary" || signupRole === "eic") && isLocked(signupRole)) {
+      toast.error("That editorial role is already filled. Please contact the editorial office.");
+      return;
+    }
+    if (signupRole === "secretary" || signupRole === "eic") {
+      claimRole(signupRole);
+      setClaimedRoles(readClaimedRoles());
+    }
     toast.success("Account created — welcome!");
     const dashboardPath =
       signupRole === "reviewer"
