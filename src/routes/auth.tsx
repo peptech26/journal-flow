@@ -1,5 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Lock } from "lucide-react";
+
+const CLAIMED_ROLES_KEY = "gjf:claimed-singleton-roles";
+type SingletonRole = "secretary" | "eic";
+function readClaimedRoles(): SingletonRole[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(CLAIMED_ROLES_KEY) ?? "[]"); } catch { return []; }
+}
+function claimRole(role: SingletonRole) {
+  if (typeof window === "undefined") return;
+  const current = readClaimedRoles();
+  if (!current.includes(role)) {
+    localStorage.setItem(CLAIMED_ROLES_KEY, JSON.stringify([...current, role]));
+  }
+}
 
 import { Leaf } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +40,11 @@ function AuthPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [signupRole, setSignupRole] = useState<"author" | "reviewer" | "secretary" | "eic">("author");
+  const [claimedRoles, setClaimedRoles] = useState<SingletonRole[]>([]);
+
+  useEffect(() => { setClaimedRoles(readClaimedRoles()); }, []);
+
+  const isLocked = (r: SingletonRole) => claimedRoles.includes(r);
 
   function notWired(label: string) {
     toast.info(`${label} — connect your database to enable.`);
@@ -32,6 +52,14 @@ function AuthPage() {
 
   function handleSignup(e: React.FormEvent) {
     e.preventDefault();
+    if ((signupRole === "secretary" || signupRole === "eic") && isLocked(signupRole)) {
+      toast.error("That editorial role is already filled. Please contact the editorial office.");
+      return;
+    }
+    if (signupRole === "secretary" || signupRole === "eic") {
+      claimRole(signupRole);
+      setClaimedRoles(readClaimedRoles());
+    }
     toast.success("Account created — welcome!");
     const dashboardPath =
       signupRole === "reviewer"
@@ -104,16 +132,30 @@ function AuthPage() {
                 <Field label="Password" name="password" type="password" required minLength={8} />
                 <div className="space-y-1.5">
                   <Label htmlFor="requested_role">I'm joining as</Label>
-                  <Select name="requested_role" value={signupRole} onValueChange={(v) => setSignupRole(v as "author" | "reviewer")}>
+                  <Select name="requested_role" value={signupRole} onValueChange={(v) => setSignupRole(v as typeof signupRole)}>
                     <SelectTrigger id="requested_role"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="author">Author — submit manuscripts</SelectItem>
                       <SelectItem value="reviewer">Reviewer — peer review submissions</SelectItem>
-                      <SelectItem value="secretary">Editorial Secretary — manage workflow</SelectItem>
-                      <SelectItem value="eic">Editor-in-Chief — oversee journal</SelectItem>
+                      <SelectItem value="secretary" disabled={isLocked("secretary")}>
+                        <span className="flex items-center gap-2">
+                          Editorial Secretary — manage workflow
+                          {isLocked("secretary") && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="eic" disabled={isLocked("eic")}>
+                        <span className="flex items-center gap-2">
+                          Editor-in-Chief — oversee journal
+                          {isLocked("eic") && <Lock className="h-3 w-3 text-muted-foreground" />}
+                        </span>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">Editorial staff accounts are provisioned by the editorial office.</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isLocked("secretary") || isLocked("eic")
+                      ? "Some editorial roles are already filled and locked. Contact the editorial office for access."
+                      : "Editorial staff accounts are provisioned by the editorial office."}
+                  </p>
                 </div>
                 <Button type="submit" className="w-full">Create account</Button>
               </form>
