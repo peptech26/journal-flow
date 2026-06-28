@@ -21,12 +21,21 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
+  const navigate = useNavigate();
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
+  const [signupRole, setSignupRole] = useState<"author" | "reviewer">("author");
 
   function notWired(label: string) {
     toast.info(`${label} — connect your database to enable.`);
   }
+
+  function handleSignup(e: React.FormEvent) {
+    e.preventDefault();
+    toast.success("Account created — welcome!");
+    navigate({ to: signupRole === "reviewer" ? "/reviewer" : "/author" });
+  }
+
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
