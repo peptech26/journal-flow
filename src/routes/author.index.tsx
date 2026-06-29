@@ -18,6 +18,8 @@ const FILTERS: (ManuscriptStatus | "all")[] = ["all", "draft", "with_editor", "u
 function AuthorDashboard() {
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<ManuscriptStatus | "all">("all");
+  useEffect(() => { ensureRole("author"); }, []);
+  const me = getCurrentUser();
 
   const list = useMemo(() => {
     return mockManuscripts.filter((m) => {
