@@ -1,68 +1,96 @@
 ## Goal
 
-Wire the full manuscript lifecycle across Author → Editorial Secretary → Reviewer → Editor-in-Chief → Library, with explicit hand-off buttons at each step and a "Submit manuscript" CTA on the library home that opens the submission system.
+Persist the entire manuscript workflow in your connected Supabase project (`amjwfovwswthhgsvdzsd`) so submissions, reviewer assignments, status transitions, file uploads, audit timeline, and role-request approvals survive reloads and are shared across users. Dashboards stay public for now (no `_authenticated/` gate yet); when no Supabase session is present we fall back to a demo user so the UI still works in the preview.
 
-Backend (Supabase) tables already exist (`manuscripts`, `manuscript_versions`, `reviewer_assignments`, `audit_events`). However the current dashboards run on mock data and auth is not yet enforced. To stay focused on the requested workflow features and keep them visible immediately, I'll implement the lifecycle on a **shared client-side store** (localStorage-backed, same shape as the Supabase schema) so every dashboard reads/writes the same manuscripts. Swapping the store for Supabase queries later is a one-file change.
+## Schema reconciliation
 
-## Status model
+Your existing `manuscript_status` enum is close to the workflow store but missing four labels. One migration adds them and a few helper columns.
+
+- ALTER ENUM `manuscript_status` ADD: `reviews_complete`, `resubmitted`, `with_eic`, `approved_for_publication`. (Existing labels `with_secretary`, `revision_requested`, `rejected_by_secretary`, `galley_proof`, `accepted`, `published`, `submitted`, `under_review`, `withdrawn` stay.)
+- `manuscripts`: add `routed_to text` ("secretary" | "author"), `rejection_reason text`.
+- `reviewer_assignments`: confirm `recommendation`, `comments_to_editor`, `comments_to_author`, `submitted_at` exist (add any missing).
+- `audit_events`: add `actor_role app_role` and `actor_name text` so the timeline survives even if a profile row is missing.
+
+## Row-level security
+
+- `manuscripts`: author SELECT/UPDATE own; secretary/EiC/admin SELECT/UPDATE all; anon SELECT only where `status = 'published'`.
+- `manuscript_versions`: author can INSERT for own manuscripts; secretary/EiC SELECT all; reviewers SELECT versions of manuscripts they're assigned to.
+- `reviewer_assignments`: secretary INSERT/UPDATE; reviewer SELECT/UPDATE own row only.
+- `audit_events`: SELECT for anyone who can read the parent manuscript; INSERT via SECURITY DEFINER helper only.
+- `role_requests` + `role_request_history`: requester SELECT own; admin SELECT/UPDATE all; INSERT for any authenticated user.
+- `reviewer_cvs`: reviewer manages own; secretary SELECT all.
+
+## Storage RLS
+
+- `manuscripts` bucket: author can write under `{manuscript_id}/...`; secretary/EiC/reviewers (assigned) read.
+- `reviewer-cvs` bucket: reviewer writes own folder; secretary reads.
+- `published` bucket: secretary/EiC write; anon read.
+- `avatars` bucket: owner writes own folder; anon read.
+
+## SECURITY DEFINER helpers
+
+- `public.log_audit(_manuscript_id uuid, _action text, _details jsonb)` — inserts an `audit_events` row and copies actor name/role from `auth.uid()`. Called from triggers on status change and from server fns.
+- Existing `has_role()` is reused.
+- `public.publish_manuscript(_id uuid)` — secretary or EiC only; flips status + `published_at`.
+
+## Trigger: status-change audit
+
+`AFTER UPDATE OF status ON manuscripts` calls `log_audit` so every transition lands in `audit_events` automatically.
+
+## Frontend rewrite
+
+Replace `src/lib/workflow-store.ts` localStorage code with a Supabase-backed module exposing the same API surface used by `manuscript-queue.tsx` so the UI doesn't change shape:
+
+- `useWorkflowList(role)` — TanStack Query reading `manuscripts` (+ joined `assignments`, latest `manuscript_versions`, `audit_events`).
+- Mutations via `createServerFn` in `src/lib/workflow.functions.ts` using `requireSupabaseAuth`:
+  - `submitManuscript`, `rejectManuscript`, `assignReviewers`, `submitReview`, `returnToAuthor`, `resubmit`, `sendToEic`, `eicRoute`, `publishManuscript`.
+- File uploads (browser side, using the publishable client) into the right bucket; the server fn records `manuscript_versions` / `reviewer_cvs` rows.
+- `src/lib/current-user.ts` becomes a thin Supabase-aware hook: reads `supabase.auth.getUser()` + `user_roles` if signed in; otherwise returns the localStorage demo user so demo flows still work.
+
+Public library page (`/`) reads `manuscripts` where `status='published'` through a public server fn using the server publishable client.
+
+## Role-request approval
+
+- Signup with `editorial_secretary` or `editor_in_chief` inserts into `role_requests` instead of granting the role. Admin sees a pending list on `/admin/role-requests`; approval flips status and the existing trigger writes to `user_roles`.
+- Singleton lock: SQL check that prevents approval when an `editorial_secretary` or `editor_in_chief` is already active. UI shows "currently held by X" and lets admin revoke first.
+- Each role-request detail page renders `role_request_history` so the full approval/rejection trail is visible.
+
+## File layout
 
 ```text
-draft → submitted → under_review → revisions_requested → resubmitted
-      → with_eic → approved_for_publication → published
-                ↘ rejected (terminal, with comment)
+supabase/migrations/<ts>_workflow_persistence.sql   # all SQL above
+
+src/lib/
+  workflow.functions.ts     # createServerFn mutations
+  workflow.server.ts        # shared types / status maps
+  workflow-queries.ts       # client-side TanStack Query hooks + uploads
+  current-user.ts           # rewritten Supabase-aware
+
+src/components/workflow/
+  manuscript-queue.tsx      # swapped to new hooks, same UI
+
+src/routes/
+  admin/role-requests.tsx   # new
+  admin/role-requests.$id.tsx
+  author.submit.tsx         # wired to real upload + submit fn
+  author.manuscripts.$id.revise.tsx  # real resubmit
+  reviewer.assignments.$id.tsx       # real submitReview
+  reviewer.profile.tsx               # real CV upload
+  secretary.index.tsx / eic.index.tsx (already pull queue)
+  index.tsx                          # public library reads Supabase
+  auth.tsx                           # role-request branch for secretary/EiC
 ```
 
-Every state change appends an entry to the manuscript's audit timeline (actor, action, note, timestamp).
+## Out of scope this turn
 
-## What changes per surface
+- Moving dashboards under `_authenticated/` (you chose "Not yet").
+- Email notifications, plagiarism integration, real CV parsing.
+- Avatar uploads (bucket exists; UI plumbing later).
 
-### Library home (`/`)
-- Promote the existing hero "Submit your manuscript" button and add a secondary sticky "Submit manuscript" button in the library section header that routes to `/author/submit` (auth gate via existing `/submit` page handles unauthenticated users).
-- Library list reads `published` manuscripts from the shared store (merged with existing mock articles so the page is never empty).
+## Risks / things you should know
 
-### Author (`/author`)
-- Dashboard lists the author's manuscripts with current status + next action.
-- "Submit to editor" button on a draft → status `submitted`.
-- When status = `revisions_requested`, show a **Submit revision** action on the manuscript detail page that uploads a new version and flips status to `resubmitted`.
-- When status = `approved_for_publication` and EiC routed to author, show **Approve galley & publish** button (publishes to library).
+- Editing an enum used by a column requires the migration to run as separate statements; I'll split into two migration files if Postgres rejects the single transaction.
+- Storage RLS policies must reference the bucket via `bucket_id` — easy to get wrong; I'll verify with the linter after.
+- The first time you sign in with a real Supabase user, the demo data in localStorage is ignored. To seed your account, sign up as an author and use the submit flow once.
 
-### Editorial Secretary (`/secretary`)
-- Triage queue shows `submitted` and `resubmitted` manuscripts.
-- Per-row actions:
-  - **Reject** (modal requires comment) → `rejected`.
-  - **Accept & assign reviewers** (modal: pick 1–3 reviewers from `/secretary/reviewers`) → `under_review`, creates `reviewer_assignments`.
-  - **Return to author for corrections** (modal: comment) → `revisions_requested` (used after reviews come back).
-  - **Send to Editor-in-Chief for galley** → `with_eic`.
-  - **Publish to library** (available once `approved_for_publication`) → `published`.
-
-### Reviewer (`/reviewer`)
-- Assignments list shows manuscripts assigned to the current reviewer.
-- Review form (already exists) gains a **Return review to secretary** submit button → marks assignment complete, appends review comments to the manuscript, and when all assignments for that round are complete flips manuscript back to secretary view (status stays `under_review` but surfaces "reviews complete" badge in triage).
-
-### Editor-in-Chief (`/eic`)
-- Galley queue lists `with_eic` manuscripts.
-- Per-row actions:
-  - **Send final to Secretary for publication** → `approved_for_publication` (route=secretary).
-  - **Send final to Author for approval** → `approved_for_publication` (route=author).
-  - **Publish to library** (direct) → `published`.
-
-### Shared
-- New `src/lib/workflow-store.ts`: typed store with `getManuscripts`, `updateStatus`, `assignReviewers`, `addReview`, `publish`, plus a `useWorkflowStore` hook (subscribes via `storage` event + custom event so all open tabs/dashboards stay in sync).
-- New `src/lib/workflow-types.ts`: status enum + helpers (label, color, next-actions per role).
-- New `src/components/workflow/audit-timeline.tsx` reused on every manuscript detail page.
-- New `src/components/workflow/action-dialog.tsx` for comment-required actions (reject, return, assign).
-
-## Technical notes
-
-- Pure frontend wiring — no schema changes, no server functions. The store mirrors the Supabase schema 1:1 so we can later replace `workflow-store.ts` internals with `supabase.from('manuscripts')...` calls without touching the dashboards.
-- "Current user" is read from `localStorage` (already set after signup in `auth.tsx`). Role-based action visibility uses that role.
-- All buttons use existing shadcn `Button`/`Dialog`/`Textarea` components; no new dependencies.
-- Audit timeline entries are appended in the store, never edited.
-
-## Out of scope (call out)
-
-- Real Supabase persistence of manuscripts (still mock — keeps this change focused on the workflow buttons you asked for).
-- Email notifications.
-- File virus scanning / plagiarism (already mocked in their own pages).
-
-Approve and I'll implement.
+Approve and I'll ship the migration first, then the frontend rewrite in a second batch so you can review the SQL before the code lands on top of it.
