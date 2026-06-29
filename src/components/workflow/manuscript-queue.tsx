@@ -239,11 +239,12 @@ function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
   );
 }
 
-function ReviewDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpenChange: (o: boolean) => void; onConfirm: (r: { recommendation: "accept" | "minor" | "major" | "reject"; commentsToEditor: string; commentsToAuthor: string }) => void }) {
-  const [rec, setRec] = useState<"accept" | "minor" | "major" | "reject">("minor");
+function ReviewDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpenChange: (o: boolean) => void; onConfirm: (r: { recommendation: "accept" | "minor_revision" | "major_revision" | "reject"; commentsToEditor: string; commentsToAuthor: string }) => void }) {
+  const [rec, setRec] = useState<"accept" | "minor_revision" | "major_revision" | "reject">("minor_revision");
   const [editor, setEditor] = useState("");
   const [author, setAuthor] = useState("");
-  const reset = () => { setRec("minor"); setEditor(""); setAuthor(""); };
+  const reset = () => { setRec("minor_revision"); setEditor(""); setAuthor(""); };
+  const recLabel: Record<typeof rec, string> = { accept: "accept", minor_revision: "minor", major_revision: "major", reject: "reject" };
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) reset(); }}>
       <DialogContent>
@@ -255,8 +256,8 @@ function ReviewDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
           <div>
             <Label className="text-xs">Recommendation</Label>
             <div className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(["accept","minor","major","reject"] as const).map((r) => (
-                <button key={r} onClick={() => setRec(r)} type="button" className={`rounded-md border px-2 py-1.5 text-xs ${rec === r ? "border-primary bg-primary/10 text-foreground" : "border-border"}`}>{r}</button>
+              {(["accept","minor_revision","major_revision","reject"] as const).map((r) => (
+                <button key={r} onClick={() => setRec(r)} type="button" className={`rounded-md border px-2 py-1.5 text-xs ${rec === r ? "border-primary bg-primary/10 text-foreground" : "border-border"}`}>{recLabel[r]}</button>
               ))}
             </div>
           </div>
