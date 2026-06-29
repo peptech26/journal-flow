@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, ArrowRight, BookOpen, FileText, Users, Send, Download } from "lucide-react";
 import type { Article } from "@/lib/mock-articles";
+import { useWorkflow } from "@/lib/workflow-store";
 import { toast } from "sonner";
 
 function downloadArticle(a: Article) {
