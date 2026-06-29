@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { mockTriage, TRIAGE_META, TriageStatus } from "@/lib/mock-secretary";
 import { Search, UserPlus, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { ManuscriptQueue } from "@/components/workflow/manuscript-queue";
+import { ensureRole, getCurrentUser } from "@/lib/current-user";
 
 export const Route = createFileRoute("/secretary/")({
   component: TriageDashboard,
