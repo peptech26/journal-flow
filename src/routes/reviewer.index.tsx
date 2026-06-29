@@ -18,6 +18,8 @@ function daysUntil(date: string) {
 }
 
 function ReviewerDashboard() {
+  useEffect(() => { ensureRole("reviewer"); }, []);
+  const me = getCurrentUser();
   const pending = mockInvitations.filter((i) => i.status === "pending");
   const active = mockAssignments;
 
