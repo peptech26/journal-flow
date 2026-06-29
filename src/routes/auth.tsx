@@ -62,7 +62,7 @@ function AuthPage() {
       setClaimedRoles(readClaimedRoles());
     }
     const fd = new FormData(e.currentTarget as HTMLFormElement);
-    const name = String(fd.get("name") ?? "New User") || "New User";
+    const name = String(fd.get("full_name") ?? "New User") || "New User";
     const email = String(fd.get("email") ?? "user@gjf.org") || "user@gjf.org";
     setCurrentUser({ id: `u-${Date.now()}`, name, email, role: signupRole });
     toast.success("Account created — welcome!");
