@@ -98,7 +98,7 @@ function AdminRoleRequests() {
             <Card><CardContent className="p-8 text-center text-sm text-muted-foreground">No role requests yet.</CardContent></Card>
           )}
           {requests.map((r) => {
-            const profile = Array.isArray(r.user) ? r.user[0] : r.user;
+            const profile = r.profile;
             return (
               <Card key={r.id}>
                 <CardHeader className="flex flex-row items-start justify-between gap-3">
