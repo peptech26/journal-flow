@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useWorkflow, workflow, MOCK_REVIEWERS, STATUS_LABEL, STATUS_TONE, type WorkflowManuscript } from "@/lib/workflow-store";
+import { useWorkflow, workflow, fetchReviewers, STATUS_LABEL, STATUS_TONE, type WorkflowManuscript } from "@/lib/workflow-store";
 import type { Role } from "@/lib/current-user";
-import { Send, XCircle, UserPlus, RotateCcw, FileUp, BookCheck, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { XCircle, UserPlus, RotateCcw, FileUp, BookCheck, CheckCircle2, ArrowUpRight } from "lucide-react";
 
 export function ManuscriptQueue({ role, currentUserId }: { role: Role; currentUserId: string }) {
   const list = useWorkflow();
