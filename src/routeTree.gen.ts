@@ -27,11 +27,13 @@ import { Route as AuthorIndexRouteImport } from './routes/author.index'
 import { Route as SecretaryStatsRouteImport } from './routes/secretary.stats'
 import { Route as SecretaryReviewersRouteImport } from './routes/secretary.reviewers'
 import { Route as SecretaryRemindersRouteImport } from './routes/secretary.reminders'
+import { Route as SecretaryProfileRouteImport } from './routes/secretary.profile'
 import { Route as SecretaryPlagiarismRouteImport } from './routes/secretary.plagiarism'
 import { Route as SecretaryCommunicationsRouteImport } from './routes/secretary.communications'
 import { Route as ReviewerProfileRouteImport } from './routes/reviewer.profile'
 import { Route as ReviewerEthicsRouteImport } from './routes/reviewer.ethics'
 import { Route as EicTriageRouteImport } from './routes/eic.triage'
+import { Route as EicProfileRouteImport } from './routes/eic.profile'
 import { Route as EicPoliciesRouteImport } from './routes/eic.policies'
 import { Route as EicPerformanceRouteImport } from './routes/eic.performance'
 import { Route as EicDelegatesRouteImport } from './routes/eic.delegates'
@@ -137,6 +139,11 @@ const SecretaryRemindersRoute = SecretaryRemindersRouteImport.update({
   path: '/reminders',
   getParentRoute: () => SecretaryRoute,
 } as any)
+const SecretaryProfileRoute = SecretaryProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => SecretaryRoute,
+} as any)
 const SecretaryPlagiarismRoute = SecretaryPlagiarismRouteImport.update({
   id: '/plagiarism',
   path: '/plagiarism',
@@ -160,6 +167,11 @@ const ReviewerEthicsRoute = ReviewerEthicsRouteImport.update({
 const EicTriageRoute = EicTriageRouteImport.update({
   id: '/triage',
   path: '/triage',
+  getParentRoute: () => EicRoute,
+} as any)
+const EicProfileRoute = EicProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => EicRoute,
 } as any)
 const EicPoliciesRoute = EicPoliciesRouteImport.update({
@@ -256,11 +268,13 @@ export interface FileRoutesByFullPath {
   '/eic/delegates': typeof EicDelegatesRoute
   '/eic/performance': typeof EicPerformanceRoute
   '/eic/policies': typeof EicPoliciesRoute
+  '/eic/profile': typeof EicProfileRoute
   '/eic/triage': typeof EicTriageRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
   '/secretary/communications': typeof SecretaryCommunicationsRoute
   '/secretary/plagiarism': typeof SecretaryPlagiarismRoute
+  '/secretary/profile': typeof SecretaryProfileRoute
   '/secretary/reminders': typeof SecretaryRemindersRoute
   '/secretary/reviewers': typeof SecretaryReviewersRoute
   '/secretary/stats': typeof SecretaryStatsRoute
@@ -291,11 +305,13 @@ export interface FileRoutesByTo {
   '/eic/delegates': typeof EicDelegatesRoute
   '/eic/performance': typeof EicPerformanceRoute
   '/eic/policies': typeof EicPoliciesRoute
+  '/eic/profile': typeof EicProfileRoute
   '/eic/triage': typeof EicTriageRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
   '/secretary/communications': typeof SecretaryCommunicationsRoute
   '/secretary/plagiarism': typeof SecretaryPlagiarismRoute
+  '/secretary/profile': typeof SecretaryProfileRoute
   '/secretary/reminders': typeof SecretaryRemindersRoute
   '/secretary/reviewers': typeof SecretaryReviewersRoute
   '/secretary/stats': typeof SecretaryStatsRoute
@@ -331,11 +347,13 @@ export interface FileRoutesById {
   '/eic/delegates': typeof EicDelegatesRoute
   '/eic/performance': typeof EicPerformanceRoute
   '/eic/policies': typeof EicPoliciesRoute
+  '/eic/profile': typeof EicProfileRoute
   '/eic/triage': typeof EicTriageRoute
   '/reviewer/ethics': typeof ReviewerEthicsRoute
   '/reviewer/profile': typeof ReviewerProfileRoute
   '/secretary/communications': typeof SecretaryCommunicationsRoute
   '/secretary/plagiarism': typeof SecretaryPlagiarismRoute
+  '/secretary/profile': typeof SecretaryProfileRoute
   '/secretary/reminders': typeof SecretaryRemindersRoute
   '/secretary/reviewers': typeof SecretaryReviewersRoute
   '/secretary/stats': typeof SecretaryStatsRoute
@@ -372,11 +390,13 @@ export interface FileRouteTypes {
     | '/eic/delegates'
     | '/eic/performance'
     | '/eic/policies'
+    | '/eic/profile'
     | '/eic/triage'
     | '/reviewer/ethics'
     | '/reviewer/profile'
     | '/secretary/communications'
     | '/secretary/plagiarism'
+    | '/secretary/profile'
     | '/secretary/reminders'
     | '/secretary/reviewers'
     | '/secretary/stats'
@@ -407,11 +427,13 @@ export interface FileRouteTypes {
     | '/eic/delegates'
     | '/eic/performance'
     | '/eic/policies'
+    | '/eic/profile'
     | '/eic/triage'
     | '/reviewer/ethics'
     | '/reviewer/profile'
     | '/secretary/communications'
     | '/secretary/plagiarism'
+    | '/secretary/profile'
     | '/secretary/reminders'
     | '/secretary/reviewers'
     | '/secretary/stats'
@@ -446,11 +468,13 @@ export interface FileRouteTypes {
     | '/eic/delegates'
     | '/eic/performance'
     | '/eic/policies'
+    | '/eic/profile'
     | '/eic/triage'
     | '/reviewer/ethics'
     | '/reviewer/profile'
     | '/secretary/communications'
     | '/secretary/plagiarism'
+    | '/secretary/profile'
     | '/secretary/reminders'
     | '/secretary/reviewers'
     | '/secretary/stats'
@@ -609,6 +633,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SecretaryRemindersRouteImport
       parentRoute: typeof SecretaryRoute
     }
+    '/secretary/profile': {
+      id: '/secretary/profile'
+      path: '/profile'
+      fullPath: '/secretary/profile'
+      preLoaderRoute: typeof SecretaryProfileRouteImport
+      parentRoute: typeof SecretaryRoute
+    }
     '/secretary/plagiarism': {
       id: '/secretary/plagiarism'
       path: '/plagiarism'
@@ -642,6 +673,13 @@ declare module '@tanstack/react-router' {
       path: '/triage'
       fullPath: '/eic/triage'
       preLoaderRoute: typeof EicTriageRouteImport
+      parentRoute: typeof EicRoute
+    }
+    '/eic/profile': {
+      id: '/eic/profile'
+      path: '/profile'
+      fullPath: '/eic/profile'
+      preLoaderRoute: typeof EicProfileRouteImport
       parentRoute: typeof EicRoute
     }
     '/eic/policies': {
@@ -781,6 +819,7 @@ interface EicRouteChildren {
   EicDelegatesRoute: typeof EicDelegatesRoute
   EicPerformanceRoute: typeof EicPerformanceRoute
   EicPoliciesRoute: typeof EicPoliciesRoute
+  EicProfileRoute: typeof EicProfileRoute
   EicTriageRoute: typeof EicTriageRoute
   EicIndexRoute: typeof EicIndexRoute
 }
@@ -791,6 +830,7 @@ const EicRouteChildren: EicRouteChildren = {
   EicDelegatesRoute: EicDelegatesRoute,
   EicPerformanceRoute: EicPerformanceRoute,
   EicPoliciesRoute: EicPoliciesRoute,
+  EicProfileRoute: EicProfileRoute,
   EicTriageRoute: EicTriageRoute,
   EicIndexRoute: EicIndexRoute,
 }
@@ -822,6 +862,7 @@ const ReviewerRouteWithChildren = ReviewerRoute._addFileChildren(
 interface SecretaryRouteChildren {
   SecretaryCommunicationsRoute: typeof SecretaryCommunicationsRoute
   SecretaryPlagiarismRoute: typeof SecretaryPlagiarismRoute
+  SecretaryProfileRoute: typeof SecretaryProfileRoute
   SecretaryRemindersRoute: typeof SecretaryRemindersRoute
   SecretaryReviewersRoute: typeof SecretaryReviewersRoute
   SecretaryStatsRoute: typeof SecretaryStatsRoute
@@ -831,6 +872,7 @@ interface SecretaryRouteChildren {
 const SecretaryRouteChildren: SecretaryRouteChildren = {
   SecretaryCommunicationsRoute: SecretaryCommunicationsRoute,
   SecretaryPlagiarismRoute: SecretaryPlagiarismRoute,
+  SecretaryProfileRoute: SecretaryProfileRoute,
   SecretaryRemindersRoute: SecretaryRemindersRoute,
   SecretaryReviewersRoute: SecretaryReviewersRoute,
   SecretaryStatsRoute: SecretaryStatsRoute,
