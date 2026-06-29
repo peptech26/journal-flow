@@ -108,7 +108,7 @@ async function fetchAll(): Promise<WorkflowManuscript[]> {
       author_id,created_at,updated_at,
       author:profiles!manuscripts_author_id_fkey(full_name),
       manuscript_versions(id,version_number,file_path,file_name,created_at),
-      reviewer_assignments(id,reviewer_id,assigned_at,submitted_at,recommendation,comments_to_editor,comments_to_author,
+      reviewer_assignments(id,reviewer_id,created_at,submitted_at,recommendation,comments_to_editor,comments_to_author,
         reviewer:profiles!reviewer_assignments_reviewer_id_fkey(full_name)),
       audit_events(id,action,details,created_at,actor_name,actor_role)
     `)
@@ -128,14 +128,23 @@ async function fetchAll(): Promise<WorkflowManuscript[]> {
         filePath: v.file_path,
         uploadedAt: v.created_at,
       }));
-    const assignments: Assignment[] = (r.reviewer_assignments ?? []).map((a) => {
-      const reviewerObj = a.reviewer as { full_name?: string } | { full_name?: string }[] | null;
-      const reviewer = Array.isArray(reviewerObj) ? reviewerObj[0] : reviewerObj;
+    const rawAssignments = (r.reviewer_assignments ?? []) as Array<{
+      id: string;
+      reviewer_id: string;
+      created_at: string;
+      submitted_at: string | null;
+      recommendation: "accept" | "minor_revision" | "major_revision" | "reject" | null;
+      comments_to_editor: string | null;
+      comments_to_author: string | null;
+      reviewer: { full_name?: string } | { full_name?: string }[] | null;
+    }>;
+    const assignments: Assignment[] = rawAssignments.map((a) => {
+      const reviewer = Array.isArray(a.reviewer) ? a.reviewer[0] : a.reviewer;
       return {
         id: a.id,
         reviewerId: a.reviewer_id,
         reviewerName: reviewer?.full_name ?? "Reviewer",
-        assignedAt: a.assigned_at,
+        assignedAt: a.created_at,
         completed: !!a.submitted_at,
         recommendation: a.recommendation,
         commentsToEditor: a.comments_to_editor,
@@ -213,13 +222,16 @@ export function useWorkflow() {
 
 async function logAudit(manuscriptId: string, action: string, details: Record<string, unknown> = {}) {
   const u = getCurrentUser();
+  const { data: userData } = await supabase.auth.getUser();
+  const actorId = userData.user?.id ?? null;
   await supabase.from("audit_events").insert({
     manuscript_id: manuscriptId,
-    actor_id: u.id.startsWith("u-") ? null : u.id,
+    actor_id: actorId,
     actor_name: u.name,
     actor_role: roleToDb(u.role),
     action,
-    details,
+    // Cast to JSON-compatible shape; jsonb column accepts any plain object.
+    details: details as never,
   });
 }
 
