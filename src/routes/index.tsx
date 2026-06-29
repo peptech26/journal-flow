@@ -41,12 +41,32 @@ export const Route = createFileRoute("/")({
 function LibraryHome() {
   const [q, setQ] = useState("");
   const [activeKw, setActiveKw] = useState<string | null>(null);
+  const workflowList = useWorkflow();
+
+  const allArticles = useMemo<Article[]>(() => {
+    const published: Article[] = workflowList
+      .filter((m) => m.status === "published")
+      .map((m) => ({
+        id: m.id,
+        title: m.title,
+        authors: [m.authorName],
+        abstract: m.abstract,
+        keywords: m.keywords,
+        doi: `10.0000/gjf.${m.id}`,
+        section: "Research",
+        volume: new Date(m.updatedAt).getFullYear() - 1984,
+        issue: 1,
+        pages: "1-12",
+        publishedAt: m.updatedAt,
+      }));
+    return [...published, ...articles];
+  }, [workflowList]);
 
   const allKeywords = useMemo(() => {
     const s = new Set<string>();
-    articles.forEach(a => a.keywords.forEach(k => s.add(k)));
+    allArticles.forEach(a => a.keywords.forEach(k => s.add(k)));
     return Array.from(s).slice(0, 20);
-  }, []);
+  }, [allArticles]);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
