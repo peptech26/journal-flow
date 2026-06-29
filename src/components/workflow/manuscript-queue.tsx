@@ -208,7 +208,9 @@ function CommentDialog({ open, onOpenChange, title, description, confirmLabel, d
 
 function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpenChange: (o: boolean) => void; onConfirm: (selected: { reviewerId: string; reviewerName: string }[]) => void }) {
   const [picked, setPicked] = useState<string[]>([]);
+  const [reviewers, setReviewers] = useState<{ reviewerId: string; reviewerName: string; expertise: string[] }[]>([]);
   const toggle = (id: string) => setPicked((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+  useEffect(() => { if (open) fetchReviewers().then(setReviewers); }, [open]);
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) setPicked([]); }}>
       <DialogContent>
@@ -217,12 +219,17 @@ function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
           <DialogDescription>Choose one to three reviewers based on expertise.</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          {MOCK_REVIEWERS.map((r) => (
+          {reviewers.length === 0 && (
+            <p className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
+              No reviewers found yet. Reviewers need to create accounts with the Reviewer role.
+            </p>
+          )}
+          {reviewers.map((r) => (
             <label key={r.reviewerId} className="flex items-start gap-3 rounded-md border border-border p-3 hover:bg-muted/40">
               <Checkbox checked={picked.includes(r.reviewerId)} onCheckedChange={() => toggle(r.reviewerId)} />
               <div>
                 <div className="text-sm font-medium">{r.reviewerName}</div>
-                <div className="text-xs text-muted-foreground">{r.expertise.join(" · ")}</div>
+                <div className="text-xs text-muted-foreground">{r.expertise.join(" · ") || "Expertise not yet listed"}</div>
               </div>
             </label>
           ))}
@@ -230,7 +237,7 @@ function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button disabled={picked.length === 0 || picked.length > 3} onClick={() => {
-            const selected = MOCK_REVIEWERS.filter((r) => picked.includes(r.reviewerId)).map((r) => ({ reviewerId: r.reviewerId, reviewerName: r.reviewerName }));
+            const selected = reviewers.filter((r) => picked.includes(r.reviewerId)).map((r) => ({ reviewerId: r.reviewerId, reviewerName: r.reviewerName }));
             onConfirm(selected); onOpenChange(false); setPicked([]);
           }}>Assign</Button>
         </DialogFooter>
