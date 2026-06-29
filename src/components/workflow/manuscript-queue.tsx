@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { useWorkflow, workflow, MOCK_REVIEWERS, STATUS_LABEL, STATUS_TONE, type WorkflowManuscript } from "@/lib/workflow-store";
+import { useWorkflow, workflow, fetchReviewers, STATUS_LABEL, STATUS_TONE, type WorkflowManuscript } from "@/lib/workflow-store";
 import type { Role } from "@/lib/current-user";
-import { Send, XCircle, UserPlus, RotateCcw, FileUp, BookCheck, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { XCircle, UserPlus, RotateCcw, FileUp, BookCheck, CheckCircle2, ArrowUpRight } from "lucide-react";
 
 export function ManuscriptQueue({ role, currentUserId }: { role: Role; currentUserId: string }) {
   const list = useWorkflow();
@@ -90,12 +90,7 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
   return (
     <div className="flex flex-wrap justify-end gap-1.5">
       {/* AUTHOR */}
-      {role === "author" && m.status === "draft" && (
-        <Button size="sm" onClick={() => { workflow.submitToEditor(m.id); toast.success("Submitted to editor"); }}>
-          <Send className="mr-1 h-3.5 w-3.5" /> Submit to editor
-        </Button>
-      )}
-      {role === "author" && m.status === "revisions_requested" && (
+      {role === "author" && m.status === "revision_requested" && (
         <Button size="sm" onClick={() => setOpenDialog("resubmit")}>
           <FileUp className="mr-1 h-3.5 w-3.5" /> Submit revision
         </Button>
@@ -180,7 +175,8 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
         open={openDialog === "review"} onOpenChange={(o) => !o && setOpenDialog(null)}
         onConfirm={(r) => {
           const a = m.assignments.find((x) => x.reviewerId === currentUserId) ?? m.assignments[0];
-          workflow.submitReview(m.id, { reviewerId: a.reviewerId, reviewerName: a.reviewerName, ...r });
+          if (!a) { toast.error("No assignment found"); return; }
+          workflow.submitReview(m.id, { reviewerId: a.reviewerId, ...r });
           toast.success("Review returned to secretary");
         }}
       />
@@ -212,7 +208,9 @@ function CommentDialog({ open, onOpenChange, title, description, confirmLabel, d
 
 function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpenChange: (o: boolean) => void; onConfirm: (selected: { reviewerId: string; reviewerName: string }[]) => void }) {
   const [picked, setPicked] = useState<string[]>([]);
+  const [reviewers, setReviewers] = useState<{ reviewerId: string; reviewerName: string; expertise: string[] }[]>([]);
   const toggle = (id: string) => setPicked((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+  useEffect(() => { if (open) fetchReviewers().then(setReviewers); }, [open]);
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) setPicked([]); }}>
       <DialogContent>
@@ -221,12 +219,17 @@ function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
           <DialogDescription>Choose one to three reviewers based on expertise.</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          {MOCK_REVIEWERS.map((r) => (
+          {reviewers.length === 0 && (
+            <p className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
+              No reviewers found yet. Reviewers need to create accounts with the Reviewer role.
+            </p>
+          )}
+          {reviewers.map((r) => (
             <label key={r.reviewerId} className="flex items-start gap-3 rounded-md border border-border p-3 hover:bg-muted/40">
               <Checkbox checked={picked.includes(r.reviewerId)} onCheckedChange={() => toggle(r.reviewerId)} />
               <div>
                 <div className="text-sm font-medium">{r.reviewerName}</div>
-                <div className="text-xs text-muted-foreground">{r.expertise.join(" · ")}</div>
+                <div className="text-xs text-muted-foreground">{r.expertise.join(" · ") || "Expertise not yet listed"}</div>
               </div>
             </label>
           ))}
@@ -234,7 +237,7 @@ function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button disabled={picked.length === 0 || picked.length > 3} onClick={() => {
-            const selected = MOCK_REVIEWERS.filter((r) => picked.includes(r.reviewerId)).map((r) => ({ reviewerId: r.reviewerId, reviewerName: r.reviewerName }));
+            const selected = reviewers.filter((r) => picked.includes(r.reviewerId)).map((r) => ({ reviewerId: r.reviewerId, reviewerName: r.reviewerName }));
             onConfirm(selected); onOpenChange(false); setPicked([]);
           }}>Assign</Button>
         </DialogFooter>
@@ -243,11 +246,12 @@ function AssignDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
   );
 }
 
-function ReviewDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpenChange: (o: boolean) => void; onConfirm: (r: { recommendation: "accept" | "minor" | "major" | "reject"; commentsToEditor: string; commentsToAuthor: string }) => void }) {
-  const [rec, setRec] = useState<"accept" | "minor" | "major" | "reject">("minor");
+function ReviewDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpenChange: (o: boolean) => void; onConfirm: (r: { recommendation: "accept" | "minor_revision" | "major_revision" | "reject"; commentsToEditor: string; commentsToAuthor: string }) => void }) {
+  const [rec, setRec] = useState<"accept" | "minor_revision" | "major_revision" | "reject">("minor_revision");
   const [editor, setEditor] = useState("");
   const [author, setAuthor] = useState("");
-  const reset = () => { setRec("minor"); setEditor(""); setAuthor(""); };
+  const reset = () => { setRec("minor_revision"); setEditor(""); setAuthor(""); };
+  const recLabel: Record<typeof rec, string> = { accept: "accept", minor_revision: "minor", major_revision: "major", reject: "reject" };
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) reset(); }}>
       <DialogContent>
@@ -259,8 +263,8 @@ function ReviewDialog({ open, onOpenChange, onConfirm }: { open: boolean; onOpen
           <div>
             <Label className="text-xs">Recommendation</Label>
             <div className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(["accept","minor","major","reject"] as const).map((r) => (
-                <button key={r} onClick={() => setRec(r)} type="button" className={`rounded-md border px-2 py-1.5 text-xs ${rec === r ? "border-primary bg-primary/10 text-foreground" : "border-border"}`}>{r}</button>
+              {(["accept","minor_revision","major_revision","reject"] as const).map((r) => (
+                <button key={r} onClick={() => setRec(r)} type="button" className={`rounded-md border px-2 py-1.5 text-xs ${rec === r ? "border-primary bg-primary/10 text-foreground" : "border-border"}`}>{recLabel[r]}</button>
               ))}
             </div>
           </div>

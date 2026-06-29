@@ -1,22 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Lock } from "lucide-react";
-import { setCurrentUser } from "@/lib/current-user";
-
-const CLAIMED_ROLES_KEY = "gjf:claimed-singleton-roles";
-type SingletonRole = "secretary" | "eic";
-function readClaimedRoles(): SingletonRole[] {
-  if (typeof window === "undefined") return [];
-  try { return JSON.parse(localStorage.getItem(CLAIMED_ROLES_KEY) ?? "[]"); } catch { return []; }
-}
-function claimRole(role: SingletonRole) {
-  if (typeof window === "undefined") return;
-  const current = readClaimedRoles();
-  if (!current.includes(role)) {
-    localStorage.setItem(CLAIMED_ROLES_KEY, JSON.stringify([...current, role]));
-  }
-}
-
 import { Leaf } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -25,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -36,47 +20,97 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+type SignupRole = "author" | "reviewer" | "editorial_secretary" | "editor_in_chief";
+
 function AuthPage() {
   const navigate = useNavigate();
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
-  const [signupRole, setSignupRole] = useState<"author" | "reviewer" | "secretary" | "eic">("author");
-  const [claimedRoles, setClaimedRoles] = useState<SingletonRole[]>([]);
+  const [signupRole, setSignupRole] = useState<SignupRole>("author");
+  const [busy, setBusy] = useState(false);
+  const [secretaryTaken, setSecretaryTaken] = useState(false);
+  const [eicTaken, setEicTaken] = useState(false);
 
-  useEffect(() => { setClaimedRoles(readClaimedRoles()); }, []);
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("user_roles").select("role").in("role", ["editorial_secretary", "editor_in_chief"]);
+      setSecretaryTaken(!!data?.some((r) => r.role === "editorial_secretary"));
+      setEicTaken(!!data?.some((r) => r.role === "editor_in_chief"));
+    })();
+  }, []);
 
-  const isLocked = (r: SingletonRole) => claimedRoles.includes(r);
-
-  function notWired(label: string) {
-    toast.info(`${label} — connect your database to enable.`);
+  async function handleSignin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    const fd = new FormData(e.currentTarget);
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email: String(fd.get("email") ?? ""),
+      password: String(fd.get("password") ?? ""),
+    });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Signed in");
+    navigate({ to: "/author" });
   }
 
-  function handleSignup(e: React.FormEvent) {
+  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if ((signupRole === "secretary" || signupRole === "eic") && isLocked(signupRole)) {
-      toast.error("That editorial role is already filled. Please contact the editorial office.");
-      return;
+    if (busy) return;
+    if (signupRole === "editorial_secretary" && secretaryTaken) {
+      toast.error("Editorial Secretary is already filled. Submit a role request to the editorial office.");
     }
-    if (signupRole === "secretary" || signupRole === "eic") {
-      claimRole(signupRole);
-      setClaimedRoles(readClaimedRoles());
+    if (signupRole === "editor_in_chief" && eicTaken) {
+      toast.error("Editor-in-Chief is already filled. Submit a role request to the editorial office.");
     }
-    const fd = new FormData(e.currentTarget as HTMLFormElement);
-    const name = String(fd.get("full_name") ?? "New User") || "New User";
-    const email = String(fd.get("email") ?? "user@gjf.org") || "user@gjf.org";
-    setCurrentUser({ id: `u-${Date.now()}`, name, email, role: signupRole });
+    const fd = new FormData(e.currentTarget);
+    const email = String(fd.get("email") ?? "");
+    const password = String(fd.get("password") ?? "");
+    const fullName = String(fd.get("full_name") ?? "");
+    setBusy(true);
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth`,
+        data: { full_name: fullName },
+      },
+    });
+    if (error) { setBusy(false); toast.error(error.message); return; }
+
+    const userId = data.user?.id;
+    if (userId) {
+      // Author + reviewer get the role granted immediately.
+      if (signupRole === "author" || signupRole === "reviewer") {
+        await supabase.from("user_roles").insert({ user_id: userId, role: signupRole });
+      } else {
+        // Singleton editorial roles → role_request for admin approval.
+        await supabase.from("role_requests").insert({
+          user_id: userId,
+          requested_role: signupRole,
+          justification: "Requested at signup",
+        });
+        toast.success("Account created. Your editorial role request is pending admin approval.");
+      }
+    }
+    setBusy(false);
     toast.success("Account created — welcome!");
     const dashboardPath =
-      signupRole === "reviewer"
-        ? "/reviewer"
-        : signupRole === "secretary"
-          ? "/secretary"
-          : signupRole === "eic"
-            ? "/eic"
-            : "/author";
+      signupRole === "reviewer" ? "/reviewer" :
+      signupRole === "editorial_secretary" ? "/secretary" :
+      signupRole === "editor_in_chief" ? "/eic" : "/author";
     navigate({ to: dashboardPath });
   }
 
+  async function handleForgot() {
+    if (!forgotEmail) { toast.error("Enter your email"); return; }
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    setForgotOpen(false);
+    if (error) toast.error(error.message);
+    else toast.success("Password reset email sent");
+  }
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -105,21 +139,13 @@ function AuthPage() {
           <h1 className="font-serif text-3xl font-semibold text-foreground">Welcome</h1>
           <p className="mt-1.5 text-sm text-muted-foreground">Sign in to submit and track your manuscripts.</p>
 
-          <Button onClick={() => notWired("Google sign-in")} variant="outline" className="mt-6 w-full" type="button">
-            <GoogleIcon /> Continue with Google
-          </Button>
-
-          <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wider text-muted-foreground">
-            <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
-          </div>
-
-          <Tabs defaultValue="signin">
+          <Tabs defaultValue="signin" className="mt-6">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign in</TabsTrigger>
               <TabsTrigger value="signup">Create account</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
-              <form onSubmit={(e) => { e.preventDefault(); notWired("Sign in"); }} className="space-y-4">
+              <form onSubmit={handleSignin} className="space-y-4">
                 <Field label="Email" name="email" type="email" required />
                 <Field label="Password" name="password" type="password" required />
                 <div className="-mt-2 flex justify-end">
@@ -127,7 +153,7 @@ function AuthPage() {
                     Forgot password?
                   </button>
                 </div>
-                <Button type="submit" className="w-full">Sign in</Button>
+                <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
@@ -137,35 +163,22 @@ function AuthPage() {
                 <Field label="Password" name="password" type="password" required minLength={8} />
                 <div className="space-y-1.5">
                   <Label htmlFor="requested_role">I'm joining as</Label>
-                  <Select name="requested_role" value={signupRole} onValueChange={(v) => setSignupRole(v as typeof signupRole)}>
+                  <Select value={signupRole} onValueChange={(v) => setSignupRole(v as SignupRole)}>
                     <SelectTrigger id="requested_role"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="author">Author — submit manuscripts</SelectItem>
                       <SelectItem value="reviewer">Reviewer — peer review submissions</SelectItem>
-                      <SelectItem value="secretary" disabled={isLocked("secretary")}>
-                        <span className="flex items-center gap-2">
-                          Editorial Secretary — manage workflow
-                          {isLocked("secretary") && <Lock className="h-3 w-3 text-muted-foreground" />}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="eic" disabled={isLocked("eic")}>
-                        <span className="flex items-center gap-2">
-                          Editor-in-Chief — oversee journal
-                          {isLocked("eic") && <Lock className="h-3 w-3 text-muted-foreground" />}
-                        </span>
-                      </SelectItem>
+                      <SelectItem value="editorial_secretary">Editorial Secretary — manage workflow{secretaryTaken ? " (request approval)" : ""}</SelectItem>
+                      <SelectItem value="editor_in_chief">Editor-in-Chief — oversee journal{eicTaken ? " (request approval)" : ""}</SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {isLocked("secretary") || isLocked("eic")
-                      ? "Some editorial roles are already filled and locked. Contact the editorial office for access."
-                      : "Editorial staff accounts are provisioned by the editorial office."}
+                    Editorial roles require admin approval before they take effect.
                   </p>
                 </div>
-                <Button type="submit" className="w-full">Create account</Button>
+                <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create account"}</Button>
               </form>
             </TabsContent>
-
           </Tabs>
         </div>
       </div>
@@ -182,7 +195,7 @@ function AuthPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setForgotOpen(false)} type="button">Cancel</Button>
-            <Button onClick={() => { setForgotOpen(false); notWired("Password reset email"); }} type="button">Send reset link</Button>
+            <Button onClick={handleForgot} type="button">Send reset link</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -196,16 +209,5 @@ function Field({ label, ...p }: { label: string } & React.InputHTMLAttributes<HT
       <Label htmlFor={p.name}>{label}</Label>
       <Input id={p.name} {...p} />
     </div>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden>
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.83z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.83C6.71 7.31 9.14 5.38 12 5.38z"/>
-    </svg>
   );
 }
