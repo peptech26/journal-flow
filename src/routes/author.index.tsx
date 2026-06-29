@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FileText, Plus, Search, CalendarClock, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/author/status-badge";
 import { mockManuscripts, STATUS_META, type ManuscriptStatus } from "@/lib/mock-manuscripts";
+import { ManuscriptQueue } from "@/components/workflow/manuscript-queue";
+import { ensureRole, getCurrentUser } from "@/lib/current-user";
 
 export const Route = createFileRoute("/author/")({
   head: () => ({ meta: [{ title: "Author dashboard — Ghana Journal of Forestry" }] }),
