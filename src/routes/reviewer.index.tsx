@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { mockAssignments, mockInvitations, ANONYMITY_META } from "@/lib/mock-reviewer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, FileText, AlertTriangle, CheckCircle2, Download } from "lucide-react";
 import { toast } from "sonner";
+import { ManuscriptQueue } from "@/components/workflow/manuscript-queue";
+import { ensureRole, getCurrentUser } from "@/lib/current-user";
 
 export const Route = createFileRoute("/reviewer/")({
   component: ReviewerDashboard,
