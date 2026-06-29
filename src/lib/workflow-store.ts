@@ -142,12 +142,11 @@ function subscribe(cb: () => void) {
 }
 
 export function useWorkflow() {
-  const data = useSyncExternalStore(subscribe, () => {
-    const v = (typeof window !== "undefined" && localStorage.getItem(KEY)) || "";
-    return v;
-  }, () => "");
-  const [list, setList] = useState<WorkflowManuscript[]>(() => read());
-  useEffect(() => { setList(read()); }, [data]);
+  const [list, setList] = useState<WorkflowManuscript[]>([]);
+  useEffect(() => {
+    setList(read());
+    return subscribe(() => setList(read()));
+  }, []);
   return list;
 }
 
