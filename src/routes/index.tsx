@@ -70,7 +70,7 @@ function LibraryHome() {
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    return articles.filter(a => {
+    return allArticles.filter(a => {
       const matchTerm = !term
         || a.title.toLowerCase().includes(term)
         || a.abstract.toLowerCase().includes(term)
@@ -79,7 +79,7 @@ function LibraryHome() {
       const matchKw = !activeKw || a.keywords.includes(activeKw);
       return matchTerm && matchKw;
     });
-  }, [q, activeKw]);
+  }, [q, activeKw, allArticles]);
 
   return (
     <div className="flex min-h-screen flex-col">
