@@ -32,6 +32,9 @@ function ReviewerDashboard() {
         </p>
       </header>
 
+      <ManuscriptQueue role="reviewer" currentUserId={me.id} />
+
+
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Pending invitations" value={pending.length} icon={<Clock className="h-4 w-4" />} />
         <StatCard label="Active reviews" value={active.length} icon={<FileText className="h-4 w-4" />} />
