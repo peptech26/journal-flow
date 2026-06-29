@@ -121,7 +121,10 @@ function LibraryHome() {
             <h2 className="font-serif text-3xl font-semibold text-foreground">The library</h2>
             <p className="mt-2 text-muted-foreground">Search published research by title, keyword or author.</p>
           </div>
-          <Link to="/guidelines" className="text-sm font-medium text-primary hover:underline">Author guidelines →</Link>
+          <div className="flex items-center gap-3">
+            <Link to="/guidelines" className="text-sm font-medium text-primary hover:underline">Author guidelines →</Link>
+            <Button asChild size="sm"><Link to="/author/submit"><Send className="mr-1.5 h-3.5 w-3.5" /> Submit manuscript</Link></Button>
+          </div>
         </div>
 
         <div className="mt-8 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
