@@ -46,6 +46,8 @@ function TriageDashboard() {
 
   return (
     <div className="space-y-6">
+      <ManuscriptQueue role="secretary" currentUserId={me.id} />
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="New today" value={2} sub="awaiting triage" />
         <StatCard label="Active reviews" value={counts.with_reviewers ?? 0} sub="across all editors" />
