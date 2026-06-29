@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
-import { LayoutDashboard, Users, BellRing, ShieldAlert, BarChart3, Inbox } from "lucide-react";
+import { LayoutDashboard, Users, BellRing, ShieldAlert, BarChart3, Inbox, UserCircle } from "lucide-react";
 
 export const Route = createFileRoute("/secretary")({
   component: SecretaryLayout,
@@ -13,6 +13,7 @@ const tabs: { to: string; label: string; icon: typeof LayoutDashboard; exact?: b
   { to: "/secretary/plagiarism", label: "Plagiarism", icon: ShieldAlert },
   { to: "/secretary/stats", label: "Statistics", icon: BarChart3 },
   { to: "/secretary/communications", label: "Comms hub", icon: Inbox },
+  { to: "/secretary/profile", label: "Profile", icon: UserCircle },
 ];
 
 function SecretaryLayout() {

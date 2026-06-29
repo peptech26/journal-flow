@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { isValidOrcid, formatOrcid } from "@/lib/orcid";
+import { AccountActions } from "@/components/account-actions";
 
 export const Route = createFileRoute("/author/profile")({
   head: () => ({ meta: [{ title: "My profile — Ghana Journal of Forestry" }] }),
@@ -94,6 +95,8 @@ function ProfilePage() {
           <Button onClick={save}><Save className="mr-1.5 h-4 w-4" /> Save profile</Button>
         </div>
       </div>
+
+      <AccountActions />
     </div>
   );
 }

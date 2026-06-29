@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
-import { LayoutDashboard, Gavel, Inbox, ShieldAlert, BarChart3, Settings2, UserCheck } from "lucide-react";
+import { LayoutDashboard, Gavel, Inbox, ShieldAlert, BarChart3, Settings2, UserCheck, UserCircle } from "lucide-react";
 
 export const Route = createFileRoute("/eic")({
   component: EicLayout,
@@ -14,6 +14,7 @@ const tabs: { to: string; label: string; icon: typeof LayoutDashboard; exact?: b
   { to: "/eic/performance", label: "Performance", icon: BarChart3 },
   { to: "/eic/policies", label: "Policies", icon: Settings2 },
   { to: "/eic/delegates", label: "Delegates", icon: UserCheck },
+  { to: "/eic/profile", label: "Profile", icon: UserCircle },
 ];
 
 function EicLayout() {
