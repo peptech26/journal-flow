@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { getCurrentUser, type Role } from "./current-user";
 
 export type WorkflowStatus =
