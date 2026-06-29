@@ -49,6 +49,7 @@ function AuthorDashboard() {
 
       <div className="mt-8 rounded-2xl border border-border bg-card p-4 shadow-card">
         <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by title…" className="pl-9" />
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
