@@ -1,75 +1,68 @@
-## Author Dashboard — Implementation Plan
+## Goal
 
-Scope: build the Author-side experience listed below. Since Lovable Cloud (Supabase) isn't connected yet, I'll scaffold the full UI with realistic mock state now, structured so swapping in real data + storage later is a drop-in change.
+Wire the full manuscript lifecycle across Author → Editorial Secretary → Reviewer → Editor-in-Chief → Library, with explicit hand-off buttons at each step and a "Submit manuscript" CTA on the library home that opens the submission system.
 
-### Routes (new)
+Backend (Supabase) tables already exist (`manuscripts`, `manuscript_versions`, `reviewer_assignments`, `audit_events`). However the current dashboards run on mock data and auth is not yet enforced. To stay focused on the requested workflow features and keep them visible immediately, I'll implement the lifecycle on a **shared client-side store** (localStorage-backed, same shape as the Supabase schema) so every dashboard reads/writes the same manuscripts. Swapping the store for Supabase queries later is a one-file change.
 
+## Status model
+
+```text
+draft → submitted → under_review → revisions_requested → resubmitted
+      → with_eic → approved_for_publication → published
+                ↘ rejected (terminal, with comment)
 ```
-/author                       Dashboard home (submissions list + status)
-/author/profile               Profile + avatar upload
-/author/submit                Smart Submission Wizard (multi-step)
-/author/manuscripts/$id       Manuscript detail (status, timeline, correspondence)
-/author/manuscripts/$id/revise   Revision upload + response letter
-/author/manuscripts/$id/ethics   Ethics & disclosure forms
-```
 
-Author-only routes will live under `_authenticated/author/*` once auth is wired. For now they're public so we can preview.
+Every state change appends an entry to the manuscript's audit timeline (actor, action, note, timestamp).
 
-### Features → UI mapping
+## What changes per surface
 
-1. **Profile picture (used on article cards)**
-   - `/author/profile` page with avatar dropzone, crop preview, name, affiliation, ORCID iD, bio.
-   - Article cards on `/` extended with author avatar + name strip.
-   - Storage target later: `avatars/` public bucket.
+### Library home (`/`)
+- Promote the existing hero "Submit your manuscript" button and add a secondary sticky "Submit manuscript" button in the library section header that routes to `/author/submit` (auth gate via existing `/submit` page handles unauthenticated users).
+- Library list reads `published` manuscripts from the shared store (merged with existing mock articles so the page is never empty).
 
-2. **Smart Submission Wizard** (`/author/submit`)
-   - Steps: Type & Title → Abstract & Keywords → Authors & ORCID → Files → Ethics → Review & Submit.
-   - ORCID field with format validation (`0000-0000-0000-000X` + checksum).
-   - Keywords as chip input. Co-authors repeater (name, email, affiliation, ORCID, corresponding flag).
-   - Reference textarea with an "Auto-format (APA)" button that normalises spacing/punctuation client-side.
-   - Progress bar + ability to save draft (localStorage now, DB later).
+### Author (`/author`)
+- Dashboard lists the author's manuscripts with current status + next action.
+- "Submit to editor" button on a draft → status `submitted`.
+- When status = `revisions_requested`, show a **Submit revision** action on the manuscript detail page that uploads a new version and flips status to `resubmitted`.
+- When status = `approved_for_publication` and EiC routed to author, show **Approve galley & publish** button (publishes to library).
 
-3. **File Validation**
-   - On upload: check extension (.docx/.pdf), size cap, estimate word count (for .txt/.pdf via lightweight parse; .docx flagged "will be checked server-side").
-   - Anonymization check: scan extracted text for author names from the metadata step → warn if found.
-   - "Convert to PDF" placeholder action (stub now; real conversion runs in a server function once Cloud is on).
-   - Inline checklist with pass/warn/fail badges before allowing submit.
+### Editorial Secretary (`/secretary`)
+- Triage queue shows `submitted` and `resubmitted` manuscripts.
+- Per-row actions:
+  - **Reject** (modal requires comment) → `rejected`.
+  - **Accept & assign reviewers** (modal: pick 1–3 reviewers from `/secretary/reviewers`) → `under_review`, creates `reviewer_assignments`.
+  - **Return to author for corrections** (modal: comment) → `revisions_requested` (used after reviews come back).
+  - **Send to Editor-in-Chief for galley** → `with_eic`.
+  - **Publish to library** (available once `approved_for_publication`) → `published`.
 
-4. **Real-Time Dashboard** (`/author`)
-   - Cards per manuscript: title, status badge (Draft / With Editor / Under Review / Revisions Requested / Decision Pending / Accepted / Published / Rejected), submitted date, last update, ETA to decision.
-   - Filters: status, year. Search by title.
-   - Empty state CTA → submission wizard.
+### Reviewer (`/reviewer`)
+- Assignments list shows manuscripts assigned to the current reviewer.
+- Review form (already exists) gains a **Return review to secretary** submit button → marks assignment complete, appends review comments to the manuscript, and when all assignments for that round are complete flips manuscript back to secretary view (status stays `under_review` but surfaces "reviews complete" badge in triage).
 
-5. **Revision Upload** (`/author/manuscripts/$id/revise`)
-   - New file dropzone, "Highlight changes" toggle (track-changes vs colored-text guidance), point-by-point response letter editor (reviewer comment ↔ author response pairs auto-populated from prior review).
-   - Submit creates a new manuscript version row (mocked list now).
+### Editor-in-Chief (`/eic`)
+- Galley queue lists `with_eic` manuscripts.
+- Per-row actions:
+  - **Send final to Secretary for publication** → `approved_for_publication` (route=secretary).
+  - **Send final to Author for approval** → `approved_for_publication` (route=author).
+  - **Publish to library** (direct) → `published`.
 
-6. **Correspondence Log** (tab on manuscript detail)
-   - Unified timeline: editor decisions, reviewer comments (anonymized), system events, emails sent. Each entry timestamped, type-tagged, expandable.
+### Shared
+- New `src/lib/workflow-store.ts`: typed store with `getManuscripts`, `updateStatus`, `assignReviewers`, `addReview`, `publish`, plus a `useWorkflowStore` hook (subscribes via `storage` event + custom event so all open tabs/dashboards stay in sync).
+- New `src/lib/workflow-types.ts`: status enum + helpers (label, color, next-actions per role).
+- New `src/components/workflow/audit-timeline.tsx` reused on every manuscript detail page.
+- New `src/components/workflow/action-dialog.tsx` for comment-required actions (reject, return, assign).
 
-7. **Publication Ethics Forms** (`/author/manuscripts/$id/ethics`)
-   - Three one-click forms: Conflict of Interest, Data Availability Statement, Copyright Transfer Agreement.
-   - Each renders a pre-filled template, checkbox attestations, typed-signature field, "Generate & sign" → produces a downloadable PDF stub and marks the form complete on the manuscript.
+## Technical notes
 
-### Shared building blocks
+- Pure frontend wiring — no schema changes, no server functions. The store mirrors the Supabase schema 1:1 so we can later replace `workflow-store.ts` internals with `supabase.from('manuscripts')...` calls without touching the dashboards.
+- "Current user" is read from `localStorage` (already set after signup in `auth.tsx`). Role-based action visibility uses that role.
+- All buttons use existing shadcn `Button`/`Dialog`/`Textarea` components; no new dependencies.
+- Audit timeline entries are appended in the store, never edited.
 
-- `src/lib/mock-manuscripts.ts` — sample manuscripts, versions, reviews, timeline events, ethics state.
-- `src/components/author/` — `StatusBadge`, `ManuscriptCard`, `WizardStepper`, `FileDropzone`, `ValidationChecklist`, `TimelineList`, `ResponseLetterEditor`, `EthicsFormCard`, `AvatarUploader`.
-- `src/lib/orcid.ts` — ORCID validator with checksum.
-- `src/lib/reference-format.ts` — naive APA normaliser.
-- Header gets an "Author dashboard" link when a (mock) session flag is set.
+## Out of scope (call out)
 
-### What I'm NOT doing this round
+- Real Supabase persistence of manuscripts (still mock — keeps this change focused on the workflow buttons you asked for).
+- Email notifications.
+- File virus scanning / plagiarism (already mocked in their own pages).
 
-- Real auth, RLS, persistence — needs Lovable Cloud connection. UI will already speak the right shapes so wiring is mechanical.
-- True DOCX parsing / PDF conversion — needs server function (Cloud).
-- Email sending — needs Cloud + email domain.
-
-### Technical notes (for your reference)
-
-- Wizard state held in a single `useReducer` with `localStorage` persistence keyed by draft id.
-- File checks run in-browser via `FileReader` + a small word-count heuristic for PDFs (`pdfjs-dist` would be added only if you want true PDF text extraction now — say the word and I'll add it).
-- Status badges + timeline use the existing forest/gold theme; no new tokens.
-- All new routes follow TanStack file-based routing (`src/routes/author.*.tsx`).
-
-Approve and I'll build it. Want me to **also** add `pdfjs-dist` for real PDF word-count/anonymization checks now, or leave that for the Cloud phase?
+Approve and I'll implement.

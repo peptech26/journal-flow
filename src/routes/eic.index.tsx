@@ -1,14 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { eicMetrics } from "@/lib/mock-eic";
 import { FileText, Clock, AlertTriangle, CheckCircle2, XCircle, Gauge } from "lucide-react";
+import { ManuscriptQueue } from "@/components/workflow/manuscript-queue";
+import { ensureRole, getCurrentUser } from "@/lib/current-user";
 
 export const Route = createFileRoute("/eic/")({
   component: ExecutiveDashboard,
 });
 
 function ExecutiveDashboard() {
+  useEffect(() => { ensureRole("eic"); }, []);
+  const me = getCurrentUser();
   const m = eicMetrics;
   const cards = [
     { label: "Active submissions", value: m.activeSubmissions, icon: FileText, tone: "text-foreground" },
@@ -20,6 +25,7 @@ function ExecutiveDashboard() {
   ];
   return (
     <div className="space-y-6">
+      <ManuscriptQueue role="eic" currentUserId={me.id} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {cards.map((c) => (
           <Card key={c.label}>

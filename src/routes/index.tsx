@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, ArrowRight, BookOpen, FileText, Users, Send, Download } from "lucide-react";
 import type { Article } from "@/lib/mock-articles";
+import { useWorkflow } from "@/lib/workflow-store";
 import { toast } from "sonner";
 
 function downloadArticle(a: Article) {
@@ -40,16 +41,36 @@ export const Route = createFileRoute("/")({
 function LibraryHome() {
   const [q, setQ] = useState("");
   const [activeKw, setActiveKw] = useState<string | null>(null);
+  const workflowList = useWorkflow();
+
+  const allArticles = useMemo<Article[]>(() => {
+    const published: Article[] = workflowList
+      .filter((m) => m.status === "published")
+      .map((m) => ({
+        id: m.id,
+        title: m.title,
+        authors: [m.authorName],
+        abstract: m.abstract,
+        keywords: m.keywords,
+        doi: `10.0000/gjf.${m.id}`,
+        section: "Research",
+        volume: new Date(m.updatedAt).getFullYear() - 1984,
+        issue: 1,
+        pages: "1-12",
+        publishedAt: m.updatedAt,
+      }));
+    return [...published, ...articles];
+  }, [workflowList]);
 
   const allKeywords = useMemo(() => {
     const s = new Set<string>();
-    articles.forEach(a => a.keywords.forEach(k => s.add(k)));
+    allArticles.forEach(a => a.keywords.forEach(k => s.add(k)));
     return Array.from(s).slice(0, 20);
-  }, []);
+  }, [allArticles]);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
-    return articles.filter(a => {
+    return allArticles.filter(a => {
       const matchTerm = !term
         || a.title.toLowerCase().includes(term)
         || a.abstract.toLowerCase().includes(term)
@@ -58,7 +79,7 @@ function LibraryHome() {
       const matchKw = !activeKw || a.keywords.includes(activeKw);
       return matchTerm && matchKw;
     });
-  }, [q, activeKw]);
+  }, [q, activeKw, allArticles]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -100,7 +121,10 @@ function LibraryHome() {
             <h2 className="font-serif text-3xl font-semibold text-foreground">The library</h2>
             <p className="mt-2 text-muted-foreground">Search published research by title, keyword or author.</p>
           </div>
-          <Link to="/guidelines" className="text-sm font-medium text-primary hover:underline">Author guidelines →</Link>
+          <div className="flex items-center gap-3">
+            <Link to="/guidelines" className="text-sm font-medium text-primary hover:underline">Author guidelines →</Link>
+            <Button asChild size="sm"><Link to="/author/submit"><Send className="mr-1.5 h-3.5 w-3.5" /> Submit manuscript</Link></Button>
+          </div>
         </div>
 
         <div className="mt-8 rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">

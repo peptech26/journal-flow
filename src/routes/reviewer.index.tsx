@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { mockAssignments, mockInvitations, ANONYMITY_META } from "@/lib/mock-reviewer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, FileText, AlertTriangle, CheckCircle2, Download } from "lucide-react";
 import { toast } from "sonner";
+import { ManuscriptQueue } from "@/components/workflow/manuscript-queue";
+import { ensureRole, getCurrentUser } from "@/lib/current-user";
 
 export const Route = createFileRoute("/reviewer/")({
   component: ReviewerDashboard,
@@ -15,6 +18,8 @@ function daysUntil(date: string) {
 }
 
 function ReviewerDashboard() {
+  useEffect(() => { ensureRole("reviewer"); }, []);
+  const me = getCurrentUser();
   const pending = mockInvitations.filter((i) => i.status === "pending");
   const active = mockAssignments;
 
@@ -26,6 +31,9 @@ function ReviewerDashboard() {
           Your assigned reviews, pending invitations, and deadlines in one place.
         </p>
       </header>
+
+      <ManuscriptQueue role="reviewer" currentUserId={me.id} />
+
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Pending invitations" value={pending.length} icon={<Clock className="h-4 w-4" />} />

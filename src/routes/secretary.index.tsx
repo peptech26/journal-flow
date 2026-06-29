@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { mockTriage, TRIAGE_META, TriageStatus } from "@/lib/mock-secretary";
 import { Search, UserPlus, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { ManuscriptQueue } from "@/components/workflow/manuscript-queue";
+import { ensureRole, getCurrentUser } from "@/lib/current-user";
 
 export const Route = createFileRoute("/secretary/")({
   component: TriageDashboard,
@@ -25,6 +27,8 @@ const FILTERS: { key: TriageStatus | "all"; label: string }[] = [
 function TriageDashboard() {
   const [filter, setFilter] = useState<TriageStatus | "all">("all");
   const [query, setQuery] = useState("");
+  useEffect(() => { ensureRole("secretary"); }, []);
+  const me = getCurrentUser();
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: mockTriage.length };
@@ -42,6 +46,8 @@ function TriageDashboard() {
 
   return (
     <div className="space-y-6">
+      <ManuscriptQueue role="secretary" currentUserId={me.id} />
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="New today" value={2} sub="awaiting triage" />
         <StatCard label="Active reviews" value={counts.with_reviewers ?? 0} sub="across all editors" />
