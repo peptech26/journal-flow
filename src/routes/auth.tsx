@@ -105,7 +105,7 @@ function AuthPage() {
   async function handleForgot() {
     if (!forgotEmail) { toast.error("Enter your email"); return; }
     const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/auth`,
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     setForgotOpen(false);
     if (error) toast.error(error.message);
