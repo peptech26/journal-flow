@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           action: string
           actor_id: string | null
+          actor_name: string | null
+          actor_role: Database["public"]["Enums"]["app_role"] | null
           created_at: string
           details: Json | null
           id: string
@@ -26,6 +28,8 @@ export type Database = {
         Insert: {
           action: string
           actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
           created_at?: string
           details?: Json | null
           id?: string
@@ -34,6 +38,8 @@ export type Database = {
         Update: {
           action?: string
           actor_id?: string | null
+          actor_name?: string | null
+          actor_role?: Database["public"]["Enums"]["app_role"] | null
           created_at?: string
           details?: Json | null
           id?: string
@@ -105,6 +111,8 @@ export type Database = {
           keywords: string[] | null
           published_at: string | null
           published_pdf_url: string | null
+          rejection_reason: string | null
+          routed_to: string | null
           status: Database["public"]["Enums"]["manuscript_status"]
           subject_area: string | null
           title: string
@@ -121,6 +129,8 @@ export type Database = {
           keywords?: string[] | null
           published_at?: string | null
           published_pdf_url?: string | null
+          rejection_reason?: string | null
+          routed_to?: string | null
           status?: Database["public"]["Enums"]["manuscript_status"]
           subject_area?: string | null
           title: string
@@ -137,6 +147,8 @@ export type Database = {
           keywords?: string[] | null
           published_at?: string | null
           published_pdf_url?: string | null
+          rejection_reason?: string | null
+          routed_to?: string | null
           status?: Database["public"]["Enums"]["manuscript_status"]
           subject_area?: string | null
           title?: string
@@ -199,6 +211,7 @@ export type Database = {
           reviewer_id: string
           round: number
           status: Database["public"]["Enums"]["assignment_status"]
+          submitted_at: string | null
           updated_at: string
         }
         Insert: {
@@ -216,6 +229,7 @@ export type Database = {
           reviewer_id: string
           round?: number
           status?: Database["public"]["Enums"]["assignment_status"]
+          submitted_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -233,6 +247,7 @@ export type Database = {
           reviewer_id?: string
           round?: number
           status?: Database["public"]["Enums"]["assignment_status"]
+          submitted_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -413,6 +428,10 @@ export type Database = {
         | "galley_proof"
         | "published"
         | "withdrawn"
+        | "reviews_complete"
+        | "resubmitted"
+        | "with_eic"
+        | "approved_for_publication"
       review_recommendation:
         | "accept"
         | "minor_revision"
@@ -570,6 +589,10 @@ export const Constants = {
         "galley_proof",
         "published",
         "withdrawn",
+        "reviews_complete",
+        "resubmitted",
+        "with_eic",
+        "approved_for_publication",
       ],
       review_recommendation: [
         "accept",
