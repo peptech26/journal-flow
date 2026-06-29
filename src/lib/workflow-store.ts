@@ -385,21 +385,20 @@ export const workflow = {
 
 // Fetch active reviewers (users with the 'reviewer' role) for the assign dialog.
 export async function fetchReviewers(): Promise<{ reviewerId: string; reviewerName: string; expertise: string[] }[]> {
-  const { data, error } = await supabase
+  const { data: roles } = await supabase
     .from("user_roles")
-    .select("user_id, profile:profiles!user_roles_user_id_fkey(full_name, expertise)")
+    .select("user_id")
     .eq("role", "reviewer");
-  if (error) return [];
-  return (data ?? []).map((row) => {
-    const p = row.profile as { full_name?: string; expertise?: string[] } | { full_name?: string; expertise?: string[] }[] | null;
-    const profile = Array.isArray(p) ? p[0] : p;
-    return {
-      reviewerId: row.user_id,
-      reviewerName: profile?.full_name ?? "Reviewer",
-      expertise: profile?.expertise ?? [],
-    };
-  });
+  const ids = (roles ?? []).map((r) => r.user_id);
+  if (ids.length === 0) return [];
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id,full_name,expertise")
+    .in("id", ids);
+  return (profiles ?? []).map((p) => ({
+    reviewerId: p.id,
+    reviewerName: p.full_name ?? "Reviewer",
+    expertise: p.expertise ?? [],
+  }));
 }
 
-// Backwards-compat re-export so existing imports still resolve.
-export const MOCK_REVIEWERS: { reviewerId: string; reviewerName: string; expertise: string[] }[] = [];
