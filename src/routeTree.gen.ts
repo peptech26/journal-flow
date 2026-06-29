@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SecretaryRouteImport } from './routes/secretary'
 import { Route as ReviewerRouteImport } from './routes/reviewer'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as EicRouteImport } from './routes/eic'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -59,6 +60,11 @@ const SecretaryRoute = SecretaryRouteImport.update({
 const ReviewerRoute = ReviewerRouteImport.update({
   id: '/reviewer',
   path: '/reviewer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidelinesRoute = GuidelinesRouteImport.update({
@@ -238,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/eic': typeof EicRouteWithChildren
   '/guidelines': typeof GuidelinesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/submit': typeof SubmitRoute
   '/admin/role-requests': typeof AdminRoleRequestsRoute
   '/author/profile': typeof AuthorProfileRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/eic': typeof EicRouteWithChildren
   '/guidelines': typeof GuidelinesRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/eic'
     | '/guidelines'
+    | '/reset-password'
     | '/reviewer'
     | '/secretary'
     | '/submit'
@@ -387,6 +397,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/guidelines'
+    | '/reset-password'
     | '/submit'
     | '/admin/role-requests'
     | '/author/profile'
@@ -423,6 +434,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/eic'
     | '/guidelines'
+    | '/reset-password'
     | '/reviewer'
     | '/secretary'
     | '/submit'
@@ -462,6 +474,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   EicRoute: typeof EicRouteWithChildren
   GuidelinesRoute: typeof GuidelinesRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewerRoute: typeof ReviewerRouteWithChildren
   SecretaryRoute: typeof SecretaryRouteWithChildren
   SubmitRoute: typeof SubmitRoute
@@ -489,6 +502,13 @@ declare module '@tanstack/react-router' {
       path: '/reviewer'
       fullPath: '/reviewer'
       preLoaderRoute: typeof ReviewerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guidelines': {
@@ -829,6 +849,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   EicRoute: EicRouteWithChildren,
   GuidelinesRoute: GuidelinesRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ReviewerRoute: ReviewerRouteWithChildren,
   SecretaryRoute: SecretaryRouteWithChildren,
   SubmitRoute: SubmitRoute,
