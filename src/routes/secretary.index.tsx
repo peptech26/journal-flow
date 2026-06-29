@@ -27,6 +27,8 @@ const FILTERS: { key: TriageStatus | "all"; label: string }[] = [
 function TriageDashboard() {
   const [filter, setFilter] = useState<TriageStatus | "all">("all");
   const [query, setQuery] = useState("");
+  useEffect(() => { ensureRole("secretary"); }, []);
+  const me = getCurrentUser();
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: mockTriage.length };
