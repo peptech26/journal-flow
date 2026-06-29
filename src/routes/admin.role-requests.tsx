@@ -22,11 +22,12 @@ type Req = {
   justification: string | null;
   review_notes: string | null;
   created_at: string;
-  user: { full_name: string | null; email: string | null } | { full_name: string | null; email: string | null }[] | null;
+  profile?: { full_name: string | null; email: string | null };
 };
 
 type Hist = {
   id: string;
+  request_id: string;
   action: string;
   from_status: string | null;
   to_status: string | null;
@@ -42,21 +43,29 @@ function AdminRoleRequests() {
   async function load() {
     const { data } = await supabase
       .from("role_requests")
-      .select("id,user_id,requested_role,status,justification,review_notes,created_at,user:profiles!role_requests_user_id_fkey(full_name,email)")
+      .select("id,user_id,requested_role,status,justification,review_notes,created_at")
       .order("created_at", { ascending: false });
-    setRequests((data ?? []) as Req[]);
-    if (data?.length) {
+    const rows = (data ?? []) as Omit<Req, "profile">[];
+    if (rows.length) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id,full_name,email")
+        .in("id", rows.map((r) => r.user_id));
+      const byId = new Map((profiles ?? []).map((p) => [p.id, p]));
+      setRequests(rows.map((r) => ({ ...r, profile: byId.get(r.user_id) ?? undefined })));
       const { data: h } = await supabase
         .from("role_request_history")
         .select("id,request_id,action,from_status,to_status,notes,created_at")
-        .in("request_id", data.map((r) => r.id))
+        .in("request_id", rows.map((r) => r.id))
         .order("created_at", { ascending: true });
       const grouped: Record<string, Hist[]> = {};
       (h ?? []).forEach((row) => {
         grouped[row.request_id] = grouped[row.request_id] ?? [];
-        grouped[row.request_id].push(row);
+        grouped[row.request_id].push(row as Hist);
       });
       setHistory(grouped);
+    } else {
+      setRequests([]);
     }
   }
   useEffect(() => { load(); }, []);

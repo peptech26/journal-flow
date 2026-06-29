@@ -38,6 +38,7 @@ import { Route as EicDecisionsRouteImport } from './routes/eic.decisions'
 import { Route as EicConflictsRouteImport } from './routes/eic.conflicts'
 import { Route as AuthorSubmitRouteImport } from './routes/author.submit'
 import { Route as AuthorProfileRouteImport } from './routes/author.profile'
+import { Route as AdminRoleRequestsRouteImport } from './routes/admin.role-requests'
 import { Route as ReviewerInvitationsIndexRouteImport } from './routes/reviewer.invitations.index'
 import { Route as ReviewerInvitationsIdRouteImport } from './routes/reviewer.invitations.$id'
 import { Route as ReviewerAssignmentsIdRouteImport } from './routes/reviewer.assignments.$id'
@@ -190,6 +191,11 @@ const AuthorProfileRoute = AuthorProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthorRoute,
 } as any)
+const AdminRoleRequestsRoute = AdminRoleRequestsRouteImport.update({
+  id: '/admin/role-requests',
+  path: '/admin/role-requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReviewerInvitationsIndexRoute =
   ReviewerInvitationsIndexRouteImport.update({
     id: '/invitations/',
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
+  '/admin/role-requests': typeof AdminRoleRequestsRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/eic/conflicts': typeof EicConflictsRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
   '/submit': typeof SubmitRoute
+  '/admin/role-requests': typeof AdminRoleRequestsRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/eic/conflicts': typeof EicConflictsRoute
@@ -306,6 +314,7 @@ export interface FileRoutesById {
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
   '/submit': typeof SubmitRoute
+  '/admin/role-requests': typeof AdminRoleRequestsRoute
   '/author/profile': typeof AuthorProfileRoute
   '/author/submit': typeof AuthorSubmitRoute
   '/eic/conflicts': typeof EicConflictsRoute
@@ -345,6 +354,7 @@ export interface FileRouteTypes {
     | '/reviewer'
     | '/secretary'
     | '/submit'
+    | '/admin/role-requests'
     | '/author/profile'
     | '/author/submit'
     | '/eic/conflicts'
@@ -378,6 +388,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/guidelines'
     | '/submit'
+    | '/admin/role-requests'
     | '/author/profile'
     | '/author/submit'
     | '/eic/conflicts'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/reviewer'
     | '/secretary'
     | '/submit'
+    | '/admin/role-requests'
     | '/author/profile'
     | '/author/submit'
     | '/eic/conflicts'
@@ -453,6 +465,7 @@ export interface RootRouteChildren {
   ReviewerRoute: typeof ReviewerRouteWithChildren
   SecretaryRoute: typeof SecretaryRouteWithChildren
   SubmitRoute: typeof SubmitRoute
+  AdminRoleRequestsRoute: typeof AdminRoleRequestsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -660,6 +673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthorProfileRouteImport
       parentRoute: typeof AuthorRoute
     }
+    '/admin/role-requests': {
+      id: '/admin/role-requests'
+      path: '/admin/role-requests'
+      fullPath: '/admin/role-requests'
+      preLoaderRoute: typeof AdminRoleRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reviewer/invitations/': {
       id: '/reviewer/invitations/'
       path: '/invitations'
@@ -812,6 +832,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewerRoute: ReviewerRouteWithChildren,
   SecretaryRoute: SecretaryRouteWithChildren,
   SubmitRoute: SubmitRoute,
+  AdminRoleRequestsRoute: AdminRoleRequestsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
