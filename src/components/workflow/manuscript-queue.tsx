@@ -90,12 +90,7 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
   return (
     <div className="flex flex-wrap justify-end gap-1.5">
       {/* AUTHOR */}
-      {role === "author" && m.status === "draft" && (
-        <Button size="sm" onClick={() => { workflow.submitToEditor(m.id); toast.success("Submitted to editor"); }}>
-          <Send className="mr-1 h-3.5 w-3.5" /> Submit to editor
-        </Button>
-      )}
-      {role === "author" && m.status === "revisions_requested" && (
+      {role === "author" && m.status === "revision_requested" && (
         <Button size="sm" onClick={() => setOpenDialog("resubmit")}>
           <FileUp className="mr-1 h-3.5 w-3.5" /> Submit revision
         </Button>
@@ -180,7 +175,8 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
         open={openDialog === "review"} onOpenChange={(o) => !o && setOpenDialog(null)}
         onConfirm={(r) => {
           const a = m.assignments.find((x) => x.reviewerId === currentUserId) ?? m.assignments[0];
-          workflow.submitReview(m.id, { reviewerId: a.reviewerId, reviewerName: a.reviewerName, ...r });
+          if (!a) { toast.error("No assignment found"); return; }
+          workflow.submitReview(m.id, { reviewerId: a.reviewerId, ...r });
           toast.success("Review returned to secretary");
         }}
       />
