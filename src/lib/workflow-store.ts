@@ -106,10 +106,8 @@ async function fetchAll(): Promise<WorkflowManuscript[]> {
     .select(`
       id,title,abstract,keywords,status,routed_to,rejection_reason,
       author_id,created_at,updated_at,
-      author:profiles!manuscripts_author_id_fkey(full_name),
       manuscript_versions(id,version_number,file_path,file_name,created_at),
-      reviewer_assignments(id,reviewer_id,created_at,submitted_at,recommendation,comments_to_editor,comments_to_author,
-        reviewer:profiles!reviewer_assignments_reviewer_id_fkey(full_name)),
+      reviewer_assignments(id,reviewer_id,created_at,submitted_at,recommendation,comments_to_editor,comments_to_author),
       audit_events(id,action,details,created_at,actor_name,actor_role)
     `)
     .order("updated_at", { ascending: false });
@@ -117,6 +115,23 @@ async function fetchAll(): Promise<WorkflowManuscript[]> {
     console.warn("[workflow] fetch failed", error.message);
     return [];
   }
+
+  // FKs point to auth.users, not profiles, so PostgREST can't auto-embed profile
+  // info. Fetch profiles in a second pass and merge by id.
+  const userIds = new Set<string>();
+  (rows ?? []).forEach((r) => {
+    userIds.add(r.author_id);
+    (r.reviewer_assignments ?? []).forEach((a: { reviewer_id: string }) => userIds.add(a.reviewer_id));
+  });
+  let profileMap = new Map<string, { full_name: string | null }>();
+  if (userIds.size > 0) {
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id,full_name")
+      .in("id", Array.from(userIds));
+    profileMap = new Map((profiles ?? []).map((p) => [p.id, { full_name: p.full_name }]));
+  }
+
   return (rows ?? []).map((r): WorkflowManuscript => {
     const versions = (r.manuscript_versions ?? [])
       .slice()
@@ -136,21 +151,17 @@ async function fetchAll(): Promise<WorkflowManuscript[]> {
       recommendation: "accept" | "minor_revision" | "major_revision" | "reject" | null;
       comments_to_editor: string | null;
       comments_to_author: string | null;
-      reviewer: { full_name?: string } | { full_name?: string }[] | null;
     }>;
-    const assignments: Assignment[] = rawAssignments.map((a) => {
-      const reviewer = Array.isArray(a.reviewer) ? a.reviewer[0] : a.reviewer;
-      return {
-        id: a.id,
-        reviewerId: a.reviewer_id,
-        reviewerName: reviewer?.full_name ?? "Reviewer",
-        assignedAt: a.created_at,
-        completed: !!a.submitted_at,
-        recommendation: a.recommendation,
-        commentsToEditor: a.comments_to_editor,
-        commentsToAuthor: a.comments_to_author,
-      };
-    });
+    const assignments: Assignment[] = rawAssignments.map((a) => ({
+      id: a.id,
+      reviewerId: a.reviewer_id,
+      reviewerName: profileMap.get(a.reviewer_id)?.full_name ?? "Reviewer",
+      assignedAt: a.created_at,
+      completed: !!a.submitted_at,
+      recommendation: a.recommendation,
+      commentsToEditor: a.comments_to_editor,
+      commentsToAuthor: a.comments_to_author,
+    }));
     const audit: AuditEntry[] = (r.audit_events ?? [])
       .slice()
       .sort((a: { created_at: string }, b: { created_at: string }) => a.created_at.localeCompare(b.created_at))
@@ -172,15 +183,13 @@ async function fetchAll(): Promise<WorkflowManuscript[]> {
           note,
         };
       });
-    const authorObj = r.author as { full_name?: string } | { full_name?: string }[] | null;
-    const author = Array.isArray(authorObj) ? authorObj[0] : authorObj;
     return {
       id: r.id,
       title: r.title,
       abstract: r.abstract ?? "",
       keywords: r.keywords ?? [],
       authorId: r.author_id,
-      authorName: author?.full_name ?? "Author",
+      authorName: profileMap.get(r.author_id)?.full_name ?? "Author",
       status: r.status as WorkflowStatus,
       createdAt: r.created_at,
       updatedAt: r.updated_at,
