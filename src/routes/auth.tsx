@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Lock } from "lucide-react";
+import { setCurrentUser } from "@/lib/current-user";
 
 const CLAIMED_ROLES_KEY = "gjf:claimed-singleton-roles";
 type SingletonRole = "secretary" | "eic";
