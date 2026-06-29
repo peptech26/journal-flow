@@ -168,6 +168,7 @@ export type Database = {
           id: string
           orcid: string | null
           updated_at: string
+          user_code: string | null
         }
         Insert: {
           affiliation?: string | null
@@ -180,6 +181,7 @@ export type Database = {
           id: string
           orcid?: string | null
           updated_at?: string
+          user_code?: string | null
         }
         Update: {
           affiliation?: string | null
@@ -192,6 +194,7 @@ export type Database = {
           id?: string
           orcid?: string | null
           updated_at?: string
+          user_code?: string | null
         }
         Relationships: []
       }
