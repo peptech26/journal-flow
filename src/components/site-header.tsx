@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notification-bell";
 
 export function SiteHeader() {
   return (
@@ -28,6 +29,7 @@ export function SiteHeader() {
           <Link to="/eic" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>EiC</Link>
         </nav>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <Button asChild size="sm" variant="ghost"><Link to="/auth">Sign in</Link></Button>
           <Button asChild size="sm"><Link to="/submit">Submit manuscript</Link></Button>
         </div>
