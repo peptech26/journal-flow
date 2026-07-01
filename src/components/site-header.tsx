@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/notification-bell";
 
 export function SiteHeader() {
   return (
