@@ -135,7 +135,7 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
       )}
 
       {/* REVIEWER */}
-      {role === "reviewer" && m.status === "under_review" && !m.assignments.find((a) => a.reviewerId === currentUserId || a.reviewerId === "rev-001")?.completed && (
+      {role === "reviewer" && m.status === "under_review" && !m.assignments.find((a) => a.reviewerId === currentUserId)?.completed && (
         <Button size="sm" onClick={() => setOpenDialog("review")}>
           <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Submit review
         </Button>
