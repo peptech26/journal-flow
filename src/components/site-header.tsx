@@ -33,6 +33,7 @@ export function SiteHeader() {
           <Button asChild size="sm" variant="ghost"><Link to="/auth">Sign in</Link></Button>
           <Button asChild size="sm"><Link to="/submit">Submit manuscript</Link></Button>
         </div>
+
       </div>
     </header>
   );

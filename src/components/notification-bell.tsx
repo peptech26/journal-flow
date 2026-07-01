@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Bell } from "lucide-react";
-import { useWorkflow, STATUS_LABEL, type WorkflowManuscript } from "@/lib/workflow-store";
-import { useCurrentUser, type Role } from "@/lib/current-user";
+import { useNotifications, markAllNotificationsRead, markNotificationRead } from "@/lib/notifications-store";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,82 +10,60 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function itemsForRole(list: WorkflowManuscript[], role: Role, uid: string): WorkflowManuscript[] {
-  switch (role) {
-    case "author":
-      return list.filter((m) => m.authorId === uid);
-    case "secretary":
-      return list.filter((m) =>
-        ["submitted", "resubmitted", "reviews_complete", "approved_for_publication"].includes(m.status),
-      );
-    case "reviewer":
-      return list.filter(
-        (m) => m.status === "under_review" && m.assignments.some((a) => a.reviewerId === uid && !a.completed),
-      );
-    case "eic":
-      return list.filter((m) => ["with_eic", "approved_for_publication"].includes(m.status));
-  }
-}
-
 export function NotificationBell() {
-  const list = useWorkflow();
-  const user = useCurrentUser();
-  const storageKey = `gjf:notif-seen:${user.role}:${user.id}`;
-  const [seenAt, setSeenAt] = useState<number>(0);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const raw = localStorage.getItem(storageKey);
-    setSeenAt(raw ? Number(raw) : 0);
-  }, [storageKey]);
-
-  const relevant = useMemo(() => itemsForRole(list, user.role, user.id), [list, user.role, user.id]);
-  const unread = relevant.filter((m) => new Date(m.updatedAt).getTime() > seenAt);
-
-  const markSeen = () => {
-    const now = Date.now();
-    setSeenAt(now);
-    if (typeof window !== "undefined") localStorage.setItem(storageKey, String(now));
-  };
+  const { items, unreadCount } = useNotifications();
 
   return (
-    <DropdownMenu onOpenChange={(o) => { if (!o) markSeen(); }}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           className="relative grid h-9 w-9 place-items-center rounded-md text-foreground/70 hover:bg-muted hover:text-foreground"
           aria-label="Notifications"
         >
           <Bell className="h-5 w-5" />
-          {unread.length > 0 && (
+          {unreadCount > 0 && (
             <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-              {unread.length}
+              {unreadCount}
             </span>
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
+      <DropdownMenuContent align="end" className="w-96">
         <DropdownMenuLabel className="flex items-center justify-between">
           <span>Notifications</span>
-          <span className="text-xs font-normal text-muted-foreground">{user.role}</span>
+          {unreadCount > 0 && (
+            <button
+              onClick={(e) => { e.preventDefault(); markAllNotificationsRead(); }}
+              className="text-[11px] font-normal text-muted-foreground hover:text-foreground"
+            >
+              Mark all read
+            </button>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {relevant.length === 0 && (
-          <div className="px-3 py-4 text-xs text-muted-foreground">Nothing needs your attention.</div>
+        {items.length === 0 && (
+          <div className="px-3 py-4 text-xs text-muted-foreground">You're all caught up.</div>
         )}
-        {relevant.slice(0, 8).map((m) => {
-          const isNew = new Date(m.updatedAt).getTime() > seenAt;
-          return (
-            <DropdownMenuItem key={m.id} className="flex flex-col items-start gap-0.5">
+        {items.slice(0, 8).map((n) => (
+          <DropdownMenuItem key={n.id} asChild>
+            <Link
+              to={n.link ?? "/notifications"}
+              onClick={() => { if (!n.read_at) markNotificationRead(n.id); }}
+              className="flex flex-col items-start gap-0.5"
+            >
               <div className="flex w-full items-center justify-between gap-2">
-                <span className="line-clamp-1 text-sm font-medium">{m.title}</span>
-                {isNew && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                <span className="line-clamp-1 text-sm font-medium">{n.title}</span>
+                {!n.read_at && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" />}
               </div>
-              <span className="text-[11px] text-muted-foreground">
-                {STATUS_LABEL[m.status]} · {new Date(m.updatedAt).toLocaleString()}
-              </span>
-            </DropdownMenuItem>
-          );
-        })}
+              {n.body && <span className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</span>}
+              <span className="text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/notifications" className="text-xs text-primary">View all notifications →</Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
