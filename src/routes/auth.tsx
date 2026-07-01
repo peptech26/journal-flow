@@ -90,18 +90,12 @@ function AuthPage() {
   async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy) return;
-    if (signupRole === "editorial_secretary" && secretaryTaken) {
-      toast.error("Editorial Secretary is already filled. Submit a role request to the editorial office.");
-    }
-    if (signupRole === "editor_in_chief" && eicTaken) {
-      toast.error("Editor-in-Chief is already filled. Submit a role request to the editorial office.");
-    }
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get("email") ?? "");
     const password = String(fd.get("password") ?? "");
     const fullName = String(fd.get("full_name") ?? "");
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -109,13 +103,26 @@ function AuthPage() {
         data: { full_name: fullName },
       },
     });
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { setBusy(false); toast.error(error.message); return; }
 
-    setPendingRole(signupRole);
-    setOtpEmail(email);
-    setOtpCode("");
-    toast.success("We sent a verification code to your email.");
+    // TESTING MODE: skip email verification. Try to sign in immediately.
+    let userId = signUpData.user?.id;
+    if (!signUpData.session) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setBusy(false);
+        toast.error("Turn off 'Confirm email' in Supabase Auth settings for testing mode.");
+        return;
+      }
+      userId = signInData.user?.id ?? userId;
+    }
+
+    if (userId) {
+      await supabase.from("user_roles").insert({ user_id: userId, role: signupRole });
+    }
+    setBusy(false);
+    toast.success("Account created — welcome!");
+    navigate({ to: (nextPath() ?? dashboardFor(signupRole)) as string });
   }
 
   async function handleVerifyOtp(e: React.FormEvent) {
