@@ -8,9 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { MessageThread } from "@/components/message-thread";
 import { useWorkflow, workflow, fetchReviewers, STATUS_LABEL, STATUS_TONE, type WorkflowManuscript } from "@/lib/workflow-store";
 import type { Role } from "@/lib/current-user";
-import { XCircle, UserPlus, RotateCcw, FileUp, BookCheck, CheckCircle2, ArrowUpRight } from "lucide-react";
+import { XCircle, UserPlus, RotateCcw, FileUp, BookCheck, CheckCircle2, ArrowUpRight, MessageSquare } from "lucide-react";
+
 
 export function ManuscriptQueue({ role, currentUserId }: { role: Role; currentUserId: string }) {
   const list = useWorkflow();
@@ -85,10 +87,14 @@ function Row({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role; cu
 }
 
 function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role; currentUserId: string }) {
-  const [openDialog, setOpenDialog] = useState<null | "reject" | "return" | "assign" | "review" | "resubmit">(null);
+  const [openDialog, setOpenDialog] = useState<null | "reject" | "return" | "assign" | "review" | "resubmit" | "thread">(null);
 
   return (
     <div className="flex flex-wrap justify-end gap-1.5">
+      <Button size="sm" variant="ghost" onClick={() => setOpenDialog("thread")}>
+        <MessageSquare className="mr-1 h-3.5 w-3.5" /> Discuss
+      </Button>
+
       {/* AUTHOR */}
       {role === "author" && m.status === "revision_requested" && (
         <Button size="sm" onClick={() => setOpenDialog("resubmit")}>
@@ -184,9 +190,19 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
         open={openDialog === "resubmit"} onOpenChange={(o) => !o && setOpenDialog(null)}
         onConfirm={(filename) => { workflow.resubmit(m.id, filename); toast.success("Revision submitted"); }}
       />
+      <Dialog open={openDialog === "thread"} onOpenChange={(o) => !o && setOpenDialog(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-serif">{m.title}</DialogTitle>
+            <DialogDescription>Message thread — visible to author, assigned reviewers, secretary, and Editor-in-Chief.</DialogDescription>
+          </DialogHeader>
+          <MessageThread manuscriptId={m.id} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
 
 function CommentDialog({ open, onOpenChange, title, description, confirmLabel, destructive, onConfirm }: {
   open: boolean; onOpenChange: (o: boolean) => void; title: string; description: string; confirmLabel: string; destructive?: boolean; onConfirm: (text: string) => void;
