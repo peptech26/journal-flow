@@ -144,8 +144,10 @@ function AuthPage() {
     }
     setBusy(false);
     toast.success("Email verified — welcome!");
-    navigate({ to: dashboardFor(pendingRole) });
+    const dest = (pendingRole === "author" || pendingRole === "reviewer") ? (nextPath() ?? dashboardFor(pendingRole)) : dashboardFor(pendingRole);
+    navigate({ to: dest as string });
   }
+
 
   async function handleResendOtp() {
     if (!otpEmail) return;
