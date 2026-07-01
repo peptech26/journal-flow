@@ -22,7 +22,6 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { articles } from "@/lib/mock-articles";
 import heroImg from "@/assets/forest-hero.jpg";
 
 export const Route = createFileRoute("/")({
@@ -44,7 +43,7 @@ function LibraryHome() {
   const workflowList = useWorkflow();
 
   const allArticles = useMemo<Article[]>(() => {
-    const published: Article[] = workflowList
+    return workflowList
       .filter((m) => m.status === "published")
       .map((m) => ({
         id: m.id,
@@ -52,14 +51,13 @@ function LibraryHome() {
         authors: [m.authorName],
         abstract: m.abstract,
         keywords: m.keywords,
-        doi: `10.0000/gjf.${m.id}`,
+        doi: `10.0000/gjf.${m.id.slice(0, 8)}`,
         section: "Research",
         volume: new Date(m.updatedAt).getFullYear() - 1984,
         issue: 1,
         pages: "1-12",
         publishedAt: m.updatedAt,
       }));
-    return [...published, ...articles];
   }, [workflowList]);
 
   const allKeywords = useMemo(() => {

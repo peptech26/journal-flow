@@ -1,33 +1,45 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { FileText, Plus, Search, CalendarClock, ArrowRight } from "lucide-react";
+import { FileText, Plus, Search, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/author/status-badge";
-import { mockManuscripts, STATUS_META, type ManuscriptStatus } from "@/lib/mock-manuscripts";
+import { Badge } from "@/components/ui/badge";
 import { ManuscriptQueue } from "@/components/workflow/manuscript-queue";
 import { ensureRole, getCurrentUser } from "@/lib/current-user";
+import { useWorkflow, STATUS_LABEL, STATUS_TONE, type WorkflowStatus } from "@/lib/workflow-store";
 
 export const Route = createFileRoute("/author/")({
   head: () => ({ meta: [{ title: "Author dashboard — Ghana Journal of Forestry" }] }),
   component: AuthorDashboard,
 });
 
-const FILTERS: (ManuscriptStatus | "all")[] = ["all", "draft", "with_editor", "under_review", "revisions_requested", "decision_pending", "accepted", "published"];
+const FILTERS: (WorkflowStatus | "all")[] = [
+  "all",
+  "submitted",
+  "under_review",
+  "revision_requested",
+  "with_eic",
+  "approved_for_publication",
+  "published",
+  "rejected_by_secretary",
+];
 
 function AuthorDashboard() {
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<ManuscriptStatus | "all">("all");
+  const [filter, setFilter] = useState<WorkflowStatus | "all">("all");
   useEffect(() => { ensureRole("author"); }, []);
   const me = getCurrentUser();
+  const all = useWorkflow();
 
   const list = useMemo(() => {
-    return mockManuscripts.filter((m) => {
-      const matchTerm = !q || m.title.toLowerCase().includes(q.toLowerCase());
-      const matchFilter = filter === "all" || m.status === filter;
-      return matchTerm && matchFilter;
-    });
-  }, [q, filter]);
+    return all
+      .filter((m) => m.authorId === me.id)
+      .filter((m) => {
+        const matchTerm = !q || m.title.toLowerCase().includes(q.toLowerCase());
+        const matchFilter = filter === "all" || m.status === filter;
+        return matchTerm && matchFilter;
+      });
+  }, [q, filter, all, me.id]);
 
   return (
     <div>
@@ -59,7 +71,7 @@ function AuthorDashboard() {
               onClick={() => setFilter(f)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition ${filter === f ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}
             >
-              {f === "all" ? "All" : STATUS_META[f].label}
+              {f === "all" ? "All" : STATUS_LABEL[f]}
             </button>
           ))}
         </div>
@@ -84,8 +96,8 @@ function AuthorDashboard() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-mono">{m.id}</span>
-                  <StatusBadge status={m.status} />
+                  <span className="font-mono">{m.id.slice(0, 8)}</span>
+                  <Badge variant="outline" className={`${STATUS_TONE[m.status]} border-transparent font-normal`}>{STATUS_LABEL[m.status]}</Badge>
                 </div>
                 <h3 className="mt-2 font-serif text-lg font-semibold text-foreground group-hover:text-primary">{m.title}</h3>
                 <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{m.abstract}</p>
@@ -93,11 +105,8 @@ function AuthorDashboard() {
               <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-primary" />
             </div>
             <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
-              <span>Submitted {new Date(m.submittedAt).toLocaleDateString()}</span>
-              <span>Last update {new Date(m.lastUpdatedAt).toLocaleDateString()}</span>
-              {m.estimatedDecisionAt && (
-                <span className="inline-flex items-center gap-1"><CalendarClock className="h-3.5 w-3.5" /> ETA {new Date(m.estimatedDecisionAt).toLocaleDateString()}</span>
-              )}
+              <span>Submitted {new Date(m.createdAt).toLocaleDateString()}</span>
+              <span>Last update {new Date(m.updatedAt).toLocaleDateString()}</span>
             </div>
           </Link>
         ))}

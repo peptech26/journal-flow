@@ -43,11 +43,11 @@ export function ManuscriptQueue({ role, currentUserId }: { role: Role; currentUs
 function filterByRole(list: WorkflowManuscript[], role: Role, uid: string) {
   switch (role) {
     case "author":
-      return list.filter((m) => m.authorId === uid || m.authorId === "demo-author" || m.authorId === "demo");
+      return list.filter((m) => m.authorId === uid);
     case "secretary":
       return list.filter((m) => ["submitted", "resubmitted", "reviews_complete", "under_review", "with_eic", "approved_for_publication"].includes(m.status));
     case "reviewer":
-      return list.filter((m) => m.assignments.some((a) => a.reviewerId === uid || a.reviewerId === "rev-001"));
+      return list.filter((m) => m.assignments.some((a) => a.reviewerId === uid));
     case "eic":
       return list.filter((m) => ["with_eic", "approved_for_publication", "published"].includes(m.status));
   }
@@ -135,7 +135,7 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
       )}
 
       {/* REVIEWER */}
-      {role === "reviewer" && m.status === "under_review" && !m.assignments.find((a) => a.reviewerId === currentUserId || a.reviewerId === "rev-001")?.completed && (
+      {role === "reviewer" && m.status === "under_review" && !m.assignments.find((a) => a.reviewerId === currentUserId)?.completed && (
         <Button size="sm" onClick={() => setOpenDialog("review")}>
           <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Submit review
         </Button>
