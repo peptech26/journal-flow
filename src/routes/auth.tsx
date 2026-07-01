@@ -30,6 +30,14 @@ function dashboardFor(role: SignupRole) {
     : "/author";
 }
 
+function nextPath(): string | null {
+  if (typeof window === "undefined") return null;
+  const n = new URLSearchParams(window.location.search).get("next");
+  if (!n || !n.startsWith("/")) return null;
+  return n;
+}
+
+
 function AuthPage() {
   const navigate = useNavigate();
   const [forgotOpen, setForgotOpen] = useState(false);
