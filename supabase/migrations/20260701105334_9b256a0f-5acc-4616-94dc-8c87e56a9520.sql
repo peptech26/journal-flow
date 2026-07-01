@@ -1,0 +1,1 @@
+CREATE POLICY "Editors view reviewer roles" ON public.user_roles FOR SELECT TO authenticated USING (role = 'reviewer'::app_role AND (has_role(auth.uid(), 'editorial_secretary'::app_role) OR has_role(auth.uid(), 'editor_in_chief'::app_role)));
