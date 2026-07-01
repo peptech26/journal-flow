@@ -15,11 +15,17 @@ export function SiteHeader() {
             <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">of Forestry</div>
           </div>
         </Link>
-        <nav className="hidden items-center gap-7 text-sm md:flex">
+        <nav className="hidden items-center gap-5 text-sm md:flex">
           <Link to="/" activeOptions={{ exact: true }} className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Library</Link>
           <Link to="/guidelines" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Guidelines</Link>
           <Link to="/about" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>About</Link>
           <Link to="/contact" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Contact</Link>
+          <span className="h-4 w-px bg-border" />
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Testing</span>
+          <Link to="/author" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Author</Link>
+          <Link to="/reviewer" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Reviewer</Link>
+          <Link to="/secretary" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>Secretary</Link>
+          <Link to="/eic" className="text-foreground/80 hover:text-foreground" activeProps={{ className: "text-foreground font-medium" }}>EiC</Link>
         </nav>
         <div className="flex items-center gap-2">
           <Button asChild size="sm" variant="ghost"><Link to="/auth">Sign in</Link></Button>
