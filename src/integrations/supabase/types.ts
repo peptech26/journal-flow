@@ -55,6 +55,44 @@ export type Database = {
           },
         ]
       }
+      manuscript_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          manuscript_id: string
+          sender_id: string
+          sender_name: string | null
+          sender_role: Database["public"]["Enums"]["app_role"] | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          manuscript_id: string
+          sender_id: string
+          sender_name?: string | null
+          sender_role?: Database["public"]["Enums"]["app_role"] | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          manuscript_id?: string
+          sender_id?: string
+          sender_name?: string | null
+          sender_role?: Database["public"]["Enums"]["app_role"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manuscript_messages_manuscript_id_fkey"
+            columns: ["manuscript_id"]
+            isOneToOne: false
+            referencedRelation: "manuscripts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       manuscript_versions: {
         Row: {
           cover_letter: string | null
@@ -155,6 +193,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          kind: string
+          link: string | null
+          manuscript_id: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          link?: string | null
+          manuscript_id?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          link?: string | null
+          manuscript_id?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_manuscript_id_fkey"
+            columns: ["manuscript_id"]
+            isOneToOne: false
+            referencedRelation: "manuscripts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -400,12 +482,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_manuscript: {
+        Args: { _mid: string; _uid: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      notify_users: {
+        Args: {
+          _body: string
+          _kind: string
+          _link: string
+          _manuscript_id: string
+          _title: string
+          _user_ids: string[]
+        }
+        Returns: undefined
       }
     }
     Enums: {
