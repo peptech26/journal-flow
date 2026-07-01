@@ -123,7 +123,7 @@ function LibraryHome() {
           </div>
           <div className="flex items-center gap-3">
             <Link to="/guidelines" className="text-sm font-medium text-primary hover:underline">Author guidelines →</Link>
-            <Button asChild size="sm"><Link to="/author/submit"><Send className="mr-1.5 h-3.5 w-3.5" /> Submit manuscript</Link></Button>
+            <Button asChild size="sm"><Link to="/submit"><Send className="mr-1.5 h-3.5 w-3.5" /> Submit manuscript</Link></Button>
           </div>
         </div>
 

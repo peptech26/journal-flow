@@ -30,6 +30,14 @@ function dashboardFor(role: SignupRole) {
     : "/author";
 }
 
+function nextPath(): string | null {
+  if (typeof window === "undefined") return null;
+  const n = new URLSearchParams(window.location.search).get("next");
+  if (!n || !n.startsWith("/")) return null;
+  return n;
+}
+
+
 function AuthPage() {
   const navigate = useNavigate();
   const [forgotOpen, setForgotOpen] = useState(false);
@@ -64,8 +72,9 @@ function AuthPage() {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Signed in");
-    navigate({ to: "/author" });
+    navigate({ to: (nextPath() ?? "/author") as string });
   }
+
 
   async function handleGoogle() {
     if (busy) return;
@@ -135,8 +144,10 @@ function AuthPage() {
     }
     setBusy(false);
     toast.success("Email verified — welcome!");
-    navigate({ to: dashboardFor(pendingRole) });
+    const dest = (pendingRole === "author" || pendingRole === "reviewer") ? (nextPath() ?? dashboardFor(pendingRole)) : dashboardFor(pendingRole);
+    navigate({ to: dest as string });
   }
+
 
   async function handleResendOtp() {
     if (!otpEmail) return;
