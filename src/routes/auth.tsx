@@ -72,8 +72,9 @@ function AuthPage() {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Signed in");
-    navigate({ to: "/author" });
+    navigate({ to: (nextPath() ?? "/author") as string });
   }
+
 
   async function handleGoogle() {
     if (busy) return;
