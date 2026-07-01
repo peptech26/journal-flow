@@ -13,6 +13,7 @@ import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as SecretaryRouteImport } from './routes/secretary'
 import { Route as ReviewerRouteImport } from './routes/reviewer'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as EicRouteImport } from './routes/eic'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -67,6 +68,11 @@ const ReviewerRoute = ReviewerRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidelinesRoute = GuidelinesRouteImport.update({
@@ -256,6 +262,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/eic': typeof EicRouteWithChildren
   '/guidelines': typeof GuidelinesRoute
+  '/notifications': typeof NotificationsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/guidelines': typeof GuidelinesRoute
+  '/notifications': typeof NotificationsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/submit': typeof SubmitRoute
   '/admin/role-requests': typeof AdminRoleRequestsRoute
@@ -335,6 +343,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/eic': typeof EicRouteWithChildren
   '/guidelines': typeof GuidelinesRoute
+  '/notifications': typeof NotificationsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/reviewer': typeof ReviewerRouteWithChildren
   '/secretary': typeof SecretaryRouteWithChildren
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/eic'
     | '/guidelines'
+    | '/notifications'
     | '/reset-password'
     | '/reviewer'
     | '/secretary'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/guidelines'
+    | '/notifications'
     | '/reset-password'
     | '/submit'
     | '/admin/role-requests'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/eic'
     | '/guidelines'
+    | '/notifications'
     | '/reset-password'
     | '/reviewer'
     | '/secretary'
@@ -498,6 +510,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   EicRoute: typeof EicRouteWithChildren
   GuidelinesRoute: typeof GuidelinesRoute
+  NotificationsRoute: typeof NotificationsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewerRoute: typeof ReviewerRouteWithChildren
   SecretaryRoute: typeof SecretaryRouteWithChildren
@@ -533,6 +546,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guidelines': {
@@ -891,6 +911,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   EicRoute: EicRouteWithChildren,
   GuidelinesRoute: GuidelinesRoute,
+  NotificationsRoute: NotificationsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ReviewerRoute: ReviewerRouteWithChildren,
   SecretaryRoute: SecretaryRouteWithChildren,

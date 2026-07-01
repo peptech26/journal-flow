@@ -3,7 +3,9 @@ import { ArrowLeft, FileText, MessageSquare, Clock, Mail, Shield, Upload, Histor
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/author/status-badge";
+import { MessageThread } from "@/components/message-thread";
 import { getManuscript, type Manuscript } from "@/lib/mock-manuscripts";
+
 
 export const Route = createFileRoute("/author/manuscripts/$id")({
   loader: ({ params }): Manuscript => {
@@ -58,8 +60,10 @@ function ManuscriptDetail() {
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="reviews">Reviews</TabsTrigger>
           <TabsTrigger value="versions">Versions</TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
           <TabsTrigger value="correspondence">Correspondence</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="timeline">
           <ol className="relative space-y-5 border-l border-border pl-6">
@@ -112,7 +116,12 @@ function ManuscriptDetail() {
           )}
         </TabsContent>
 
+        <TabsContent value="messages">
+          <MessageThread manuscriptId={m.id} />
+        </TabsContent>
+
         <TabsContent value="correspondence">
+
           <div className="space-y-3">
             {m.timeline.filter((t) => t.type === "email" || t.type === "decision").map((e) => (
               <div key={e.id} className="rounded-xl border border-border bg-card p-5">
