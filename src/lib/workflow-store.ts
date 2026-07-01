@@ -215,7 +215,7 @@ export function useWorkflow() {
     }
     // Optional realtime
     const channel = supabase
-      .channel("gjf-workflow")
+      .channel(`gjf-workflow-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "manuscripts" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "reviewer_assignments" }, load)
       .on("postgres_changes", { event: "*", schema: "public", table: "audit_events" }, load)
