@@ -22,8 +22,6 @@ import { SiteHeader, SiteFooter } from "@/components/site-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { articles as _unusedArticles } from "@/lib/mock-articles";
-void _unusedArticles;
 import heroImg from "@/assets/forest-hero.jpg";
 
 export const Route = createFileRoute("/")({
