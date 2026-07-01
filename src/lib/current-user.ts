@@ -99,10 +99,26 @@ export function useCurrentUser(): CurrentUser {
   return user;
 }
 
+function roleToDb(r: Role): "author" | "reviewer" | "editorial_secretary" | "editor_in_chief" {
+  switch (r) {
+    case "author": return "author";
+    case "reviewer": return "reviewer";
+    case "secretary": return "editorial_secretary";
+    case "eic": return "editor_in_chief";
+  }
+}
+
 export function ensureRole(role: Role) {
-  // For demo: ensure cached user has this role when entering a role dashboard.
-  // Real users with the wrong role still see the dashboard for now (auth
-  // gating is intentionally deferred).
+  // Testing mode: cache the role locally AND grant it in the DB so RLS
+  // policies (has_role) allow the signed-in user to see queues for that role.
   const u = getCurrentUser();
   if (u.role !== role) setCurrentUser({ ...u, role });
+  (async () => {
+    const { data } = await supabase.auth.getUser();
+    const uid = data.user?.id;
+    if (!uid) return;
+    await supabase
+      .from("user_roles")
+      .upsert({ user_id: uid, role: roleToDb(role) }, { onConflict: "user_id,role" });
+  })();
 }
