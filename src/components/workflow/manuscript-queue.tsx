@@ -142,7 +142,17 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
       )}
 
       {/* EIC */}
-      {role === "eic" && m.status === "with_eic" && (
+      {role === "eic" && m.status === "with_eic" && m.assignments.length === 0 && (
+        <>
+          <Button size="sm" onClick={() => setOpenDialog("assign")}>
+            <UserPlus className="mr-1 h-3.5 w-3.5" /> Assign reviewers
+          </Button>
+          <Button size="sm" variant="outline" className="text-red-700" onClick={() => setOpenDialog("reject")}>
+            <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
+          </Button>
+        </>
+      )}
+      {role === "eic" && m.status === "with_eic" && m.assignments.length > 0 && (
         <>
           <Button size="sm" variant="outline" onClick={() => { workflow.eicRoute(m.id, "secretary"); toast.success("Sent to secretary"); }}>
             To secretary
