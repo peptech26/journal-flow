@@ -1,6 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
 
+const editorialCommittee = [
+  { name: "Dr. (Mrs.) Lucy Amissah", role: "Editor-in-Chief" },
+  { name: "Prof. Stephen Adu-Bredu", role: "Editor" },
+  { name: "Dr. (Mrs.) Margaret Sraku-Lartey", role: "Editor" },
+  { name: "Dr. (Mrs.) Elizabeth Obeng", role: "Editor" },
+  { name: "Dr. Shalom D. Addo-Danso", role: "Editor" },
+  { name: "Mr. Francis Wilson I Owusu", role: "Editor" },
+  { name: "Ms. Martina Elizabeth Nikoi", role: "Editorial Secretary" },
+  { name: "Mr. Emmanuel Sarpong", role: "Assistant Editorial Secretary" },
+];
+
+const advisoryBoard = [
+  "Dr. M. D. Swaine (Honorary Lecturer in Botany, School of Biological Sciences, University of Aberdeen, Scotland)",
+  "Dr. N. A. Darkwa (P. O. Box 1060 K. N. U. S. T., Kumasi, Ghana)",
+  "Dr. Ouddara Souvannavong (FAO African Forestry Project, Via delle Terme di Caracalla 001000, Rome, Italy)",
+  "Prof. Ivan Eastin (Director, CINTRAFOR, University of Washington, Seattle, Washington, U. S. A.)",
+  "Prof. Kwabena Tuffour (P. O. Box 180 Achimota, Accra, Ghana)",
+  "Prof. Michael Wagner (Northern Arizona University, School of Forestry, Flagstaff, Arizona, U. S. A.)",
+  "Mr. J. G. K. Owusu (Forest Consultant, Kumasi, Ghana)",
+  "Prof. Oteng-Yeboah (Accra, Ghana)",
+  "Prof. Jeff Morrel (Oregon State University, Dept. of Forest Products, Corvallis, Oregon 97331-5704, U. S. A.)",
+  "Prof. Yoshihiko Hirashima (Graduate School of Bio-Agricultural Sciences, Nagoya University, Furo-cho Chikusaku, Nagoya 464-8601, Japan)",
+];
+
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
