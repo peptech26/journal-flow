@@ -110,8 +110,8 @@ function Actions({ m, role, currentUserId }: { m: WorkflowManuscript; role: Role
       {/* SECRETARY */}
       {role === "secretary" && (m.status === "submitted" || m.status === "resubmitted") && (
         <>
-          <Button size="sm" variant="outline" onClick={() => setOpenDialog("assign")}>
-            <UserPlus className="mr-1 h-3.5 w-3.5" /> Accept & assign
+          <Button size="sm" onClick={() => { workflow.sendToEic(m.id); toast.success("Forwarded to Editor-in-Chief"); }}>
+            <ArrowUpRight className="mr-1 h-3.5 w-3.5" /> Forward to EiC
           </Button>
           <Button size="sm" variant="outline" className="text-red-700" onClick={() => setOpenDialog("reject")}>
             <XCircle className="mr-1 h-3.5 w-3.5" /> Reject
