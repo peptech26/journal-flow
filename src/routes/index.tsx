@@ -91,10 +91,7 @@ function LibraryHome() {
         </div>
         <div className="mx-auto max-w-7xl px-4 pb-20 pt-20 sm:px-6 sm:pb-28 sm:pt-28 lg:px-8">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-primary-foreground backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-gold" /> Open peer review · since 1984
-            </span>
-            <h1 className="mt-5 font-serif text-4xl font-semibold leading-tight text-primary-foreground text-balance sm:text-5xl lg:text-6xl">
+            <h1 className="font-serif text-4xl font-semibold leading-tight text-primary-foreground text-balance sm:text-5xl lg:text-6xl">
               Ghana Journal <span className="italic text-gold">of Forestry</span>
             </h1>
             <p className="mt-5 max-w-2xl text-base text-primary-foreground/85 sm:text-lg">
