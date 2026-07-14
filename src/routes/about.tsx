@@ -49,6 +49,29 @@ function About() {
           <h2 className="mt-8 font-serif text-2xl font-semibold text-foreground">Editorial process</h2>
           <p>Every submission is triaged by the editorial secretary, assigned to subject reviewers, revised in dialogue with the authors, and finally galley-proofed by the Editor-in-Chief before publication.</p>
         </div>
+
+        <section className="mt-12">
+          <h2 className="font-serif text-2xl font-semibold text-foreground">Editorial Committee</h2>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {editorialCommittee.map((member) => (
+              <li key={member.name} className="rounded-lg border border-border bg-card p-4 shadow-card">
+                <div className="font-medium text-foreground">{member.name}</div>
+                <div className="text-sm text-muted-foreground">{member.role}</div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="mt-12">
+          <h2 className="font-serif text-2xl font-semibold text-foreground">Editorial Advisory Board</h2>
+          <ul className="mt-4 space-y-3">
+            {advisoryBoard.map((member) => (
+              <li key={member} className="rounded-lg border border-border bg-card p-4 text-sm text-foreground/85 shadow-card">
+                {member}
+              </li>
+            ))}
+          </ul>
+        </section>
       </main>
       <SiteFooter />
     </div>
